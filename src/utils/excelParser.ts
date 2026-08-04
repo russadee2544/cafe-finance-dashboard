@@ -211,22 +211,44 @@ export async function parseCashFlowExcel(file: File): Promise<CashFlowRecord[]> 
           const typeStr = String(row[1] || '');
           const type: CashFlowType = typeStr === 'CashIn' ? 'CashIn' : 'CashOut';
           
+          const recipient = String(row[2] || '');
           const note = String(row[3] || '');
           const amount = parseNumber(row[4]);
+          const methodCol = String(row[5] || row[6] || '');
           
           let category = autoCategorize(note);
           if (type === 'CashIn') {
             category = 'cash_in';
           }
+
+          // Auto-detect paymentMethod (Bank Transfer vs Cash) from keywords or columns
+          const fullText = `${typeStr} ${recipient} ${note} ${methodCol}`.toLowerCase();
+          const isBankTransfer = 
+            fullText.includes('โอน') ||
+            fullText.includes('เงินโอน') ||
+            fullText.includes('ธนาคาร') ||
+            fullText.includes('transfer') ||
+            fullText.includes('พร้อมเพย์') ||
+            fullText.includes('promptpay') ||
+            fullText.includes('kbank') ||
+            fullText.includes('scb') ||
+            fullText.includes('bbl') ||
+            fullText.includes('ktb') ||
+            fullText.includes('ttb') ||
+            fullText.includes('qr') ||
+            fullText.includes('สแกน');
+
+          const paymentMethod: 'cash' | 'transfer' = isBankTransfer ? 'transfer' : 'cash';
           
           records.push({
             id: crypto.randomUUID(),
             paymentTime,
             type,
-            recipient: String(row[2] || ''),
+            recipient,
             note,
             amount: type === 'CashOut' && amount > 0 ? -amount : amount,
-            category
+            category,
+            paymentMethod
           });
         }
         
