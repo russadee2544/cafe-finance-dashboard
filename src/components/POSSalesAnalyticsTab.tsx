@@ -125,7 +125,7 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
     if (selectedMonth === 'all' && availableMonths.length > 0) {
       setSelectedMonth(availableMonths[0]);
     }
-  }, [availableMonths]);
+  }, [availableMonths, selectedMonth]);
 
   // Filter Data by Month
   const filteredSales = useMemo(() => {

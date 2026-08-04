@@ -1,10 +1,10 @@
-const CACHE_NAME = 'baanmai-cafe-v1';
+const CACHE_NAME = 'baanmai-cafe-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/pwa-192.png',
-  '/pwa-512.png'
+  '/pwa-192.svg',
+  '/pwa-512.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -31,6 +31,24 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Navigation requests: network-first (always show latest app), fallback to cache when offline
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached || caches.match('/index.html')),
+        ),
+    );
+    return;
+  }
+
+  // Static assets: cache-first, then network
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

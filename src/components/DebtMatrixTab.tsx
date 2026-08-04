@@ -15,7 +15,7 @@ import {
   Search,
   User
 } from 'lucide-react';
-import type { DebtItem, DebtQuadrant } from '../types/finance';
+import type { DebtItem, DebtQuadrant, Transaction } from '../types/finance';
 import { DEBT_QUADRANTS } from '../data/quadrants';
 
 interface DebtMatrixTabProps {
@@ -23,6 +23,7 @@ interface DebtMatrixTabProps {
   onAddDebt: () => void;
   onUpdateDebt: (updatedDebt: DebtItem) => void;
   onDeleteDebt: (debtId: string) => void;
+  onAddTransaction?: (tx: Omit<Transaction, 'id' | 'createdAt'>) => void;
 }
 
 export const DebtMatrixTab: React.FC<DebtMatrixTabProps> = ({
@@ -30,6 +31,7 @@ export const DebtMatrixTab: React.FC<DebtMatrixTabProps> = ({
   onAddDebt,
   onUpdateDebt,
   onDeleteDebt,
+  onAddTransaction,
 }) => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid'>('pending');
   const [selectedQuadrant, setSelectedQuadrant] = useState<'all' | DebtQuadrant>('all');
@@ -71,6 +73,18 @@ export const DebtMatrixTab: React.FC<DebtMatrixTabProps> = ({
     };
 
     onUpdateDebt(updated);
+
+    onAddTransaction?.({
+      date: new Date().toISOString().split('T')[0],
+      type: 'expense',
+      amount: amountNum,
+      category: 'debt_repayment',
+      description: paymentNote
+        ? `ชำระหนี้: ${paymentModalDebt.title} (${paymentNote})`
+        : `ชำระหนี้: ${paymentModalDebt.title}`,
+      paymentMethod: 'transfer',
+      source: 'manual',
+    });
 
     if (newRemaining === 0) {
       confetti({

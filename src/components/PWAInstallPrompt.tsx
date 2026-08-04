@@ -42,7 +42,7 @@ export const PWAInstallPrompt: React.FC = () => {
   if (isStandalone || !showPrompt) return null;
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-40 animate-in slide-in-from-bottom-6 duration-500">
+    <div className="fixed bottom-28 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-40 animate-in slide-in-from-bottom-6 duration-500">
       <div className="bg-[#181A1C] text-white p-4.5 rounded-2xl border-2 border-[#D2E875] shadow-2xl backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">

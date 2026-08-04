@@ -16,9 +16,7 @@ export const getStoredTransactions = (): Transaction[] => {
   } catch (err) {
     console.error('Failed to load transactions from localStorage', err);
   }
-  // Default to sample demo transactions on first load
-  saveTransactions(SAMPLE_DEMO_TRANSACTIONS);
-  return SAMPLE_DEMO_TRANSACTIONS;
+  return [];
 };
 
 export const saveTransactions = (transactions: Transaction[]): void => {
@@ -38,9 +36,7 @@ export const getStoredDebts = (): DebtItem[] => {
   } catch (err) {
     console.error('Failed to load debts from localStorage', err);
   }
-  // Default to sample demo debts on first load
-  saveDebts(SAMPLE_DEMO_DEBTS);
-  return SAMPLE_DEMO_DEBTS;
+  return [];
 };
 
 export const saveDebts = (debts: DebtItem[]): void => {
@@ -161,8 +157,7 @@ export const getStoredDailyClosings = (): DailyClosing[] => {
   } catch (err) {
     console.error('Failed to load daily closings from localStorage', err);
   }
-  saveDailyClosings(SAMPLE_DEMO_DAILY_CLOSINGS);
-  return SAMPLE_DEMO_DAILY_CLOSINGS;
+  return [];
 };
 
 export const saveDailyClosings = (closings: DailyClosing[]): void => {
@@ -190,7 +185,7 @@ const GPOS_URL_KEY = 'cafe_gpos_google_sheet_url_v1';
 export const getStoredGPOSUrl = (): string => {
   try {
     return localStorage.getItem(GPOS_URL_KEY) || '';
-  } catch (err) {
+  } catch {
     return '';
   }
 };

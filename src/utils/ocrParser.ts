@@ -1,66 +1,108 @@
-import type { ReceiptScanResult, CategoryId } from '../types/finance';
+import { createWorker } from 'tesseract.js';
+import type { ReceiptScanResult } from '../types/finance';
+import { parseReceiptText } from './receiptParser';
 
-// Helper function to extract receipt data using pattern recognition or simulated intelligent scanner
-export const parseReceiptImage = async (file: File): Promise<ReceiptScanResult> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const fileName = file.name.toLowerCase();
-      let totalAmount = Math.floor(Math.random() * 2500) + 350;
-      let storeName = 'ร้านวัตถุดิบกาแฟ & อุปกรณ์คาเฟ่';
-      let category: CategoryId = 'coffee_beans';
-      let items = [
-        { name: 'เมล็ดกาแฟ อราบิก้า 100% (1kg)', price: 450 },
-        { name: 'ผงชาไทยพรีเมียม (500g)', price: 280 },
-      ];
+type ProgressCallback = (status: string, progress: number) => void;
 
-      if (fileName.includes('milk') || fileName.includes('dairy') || fileName.includes('นม')) {
-        storeName = 'แม็คโคร / ซูเปอร์มาร์เก็ตวัตถุดิบ';
-        category = 'dairy_syrup';
-        totalAmount = 1420;
-        items = [
-          { name: 'นมสดเมจิ 2L (3 ขวด)', price: 345 },
-          { name: 'วิปปิ้งครีม แองเคอร์ 1L', price: 220 },
-          { name: 'ไซรัปคาราเมล 750ml', price: 385 },
-          { name: 'น้ำแข็งยูนิต 5 ถุง', price: 100 },
-        ];
-      } else if (fileName.includes('power') || fileName.includes('elec') || fileName.includes('ไฟ') || fileName.includes('น้ำ')) {
-        storeName = 'การไฟฟ้าส่วนภูมิภาค / การประปา';
-        category = 'utilities';
-        totalAmount = 5840;
-        items = [
-          { name: 'ค่าไฟฟ้าร้านคาเฟ่ประจำเดือน', price: 5840 },
-        ];
-      } else if (fileName.includes('cup') || fileName.includes('pack') || fileName.includes('แก้ว')) {
-        storeName = 'บรรจุภัณฑ์คาเฟ่ พลาสติก พริ้นท์';
-        category = 'packaging';
-        totalAmount = 2650;
-        items = [
-          { name: 'แก้วแคปซูล 16oz (1,000 ใบ)', price: 1450 },
-          { name: 'ฝายกฮด (1,000 ชิ้น)', price: 650 },
-          { name: 'หลอดกระดาษรักษ์โลก (1,000 เล่ม)', price: 550 },
-        ];
-      } else if (fileName.includes('bakery') || fileName.includes('cake') || fileName.includes('เค้ก')) {
-        storeName = 'Bake & Sweet Supply';
-        category = 'bakery_food';
-        totalAmount = 3200;
-        items = [
-          { name: 'ครัวซองต์เนยสด (20 ชิ้น)', price: 1400 },
-          { name: 'ชีสเค้กหน้าไหม้ (2 ปอนด์)', price: 1200 },
-          { name: 'คุกกี้ช็อกโกแลตชิพ (15 ชิ้น)', price: 600 },
-        ];
-      }
+let progressCallback: ProgressCallback | null = null;
 
-      const today = new Date().toISOString().split('T')[0];
+let workerPromise: Promise<Awaited<ReturnType<typeof createWorker>>> | null = null;
 
-      resolve({
-        storeName,
-        date: today,
-        totalAmount,
-        category,
-        confidence: 0.94,
-        rawText: `TAX INVOICE / RECEIPT\n${storeName}\nDATE: ${today}\nTOTAL: ฿${totalAmount.toLocaleString('th-TH')}\nTHANK YOU`,
-        items,
-      });
-    }, 1200);
+// Self-hosted tesseract assets so OCR works offline / inside the PWA
+// (files live in /public/tess, copied at build time)
+const TESS_PATHS = {
+  workerPath: '/tess/worker.min.js',
+  corePath: '/tess',
+  langPath: '/tess/lang',
+};
+
+function getWorker(): Promise<Awaited<ReturnType<typeof createWorker>>> {
+  if (!workerPromise) {
+    workerPromise = createWorker('tha+eng', 1, {
+      ...TESS_PATHS,
+      logger: (m) => {
+        if (progressCallback) {
+          progressCallback(m.status, m.progress);
+        }
+      },
+    }).catch((err) => {
+      workerPromise = null;
+      throw err;
+    });
+  }
+  return workerPromise;
+}
+
+export const terminateOcrWorker = async (): Promise<void> => {
+  if (workerPromise) {
+    try {
+      const worker = await workerPromise;
+      await worker.terminate();
+    } catch {
+      // ignore cleanup errors
+    }
+    workerPromise = null;
+  }
+};
+
+function loadImageElement(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('ไม่สามารถอ่านรูปภาพได้'));
+    };
+    img.src = url;
   });
+}
+
+// Camera photos are huge (several megapixels). Downscale before OCR so phones
+// can process the image quickly and reliably.
+async function downscaleToCanvas(file: File, maxDim = 2000): Promise<HTMLCanvasElement> {
+  let source: ImageBitmap | HTMLImageElement;
+  if (typeof createImageBitmap === 'function') {
+    source = await createImageBitmap(file);
+  } else {
+    source = await loadImageElement(file);
+  }
+  try {
+    const scale = Math.min(1, maxDim / Math.max(source.width, source.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(source.width * scale));
+    canvas.height = Math.max(1, Math.round(source.height * scale));
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('ไม่สามารถวาดภาพลง canvas ได้');
+    ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    if ('close' in source) {
+      source.close();
+    }
+  }
+}
+
+export const parseReceiptImage = async (
+  file: File,
+  onProgress?: ProgressCallback,
+): Promise<ReceiptScanResult> => {
+  const previous = progressCallback;
+  progressCallback = onProgress || null;
+  try {
+    const canvas = await downscaleToCanvas(file);
+    const worker = await getWorker();
+    const { data } = await worker.recognize(canvas);
+    const parsed = parseReceiptText(data.text || '');
+    return {
+      ...parsed,
+      confidence: Math.round(data.confidence * 100) / 100,
+      rawText: data.text || '',
+    };
+  } finally {
+    progressCallback = previous;
+  }
 };

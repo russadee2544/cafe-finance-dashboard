@@ -71,7 +71,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       if (!matchDesc && !matchCat) return false;
     }
     return true;
-  }), [transactions, filterType, filterCategory, startDate, endDate, searchQuery]);
+  }), [combinedTransactions, filterType, filterCategory, startDate, endDate, searchQuery]);
 
   const handleExportExcel = () => {
     const exportData = filtered.map((t) => ({

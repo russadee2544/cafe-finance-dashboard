@@ -730,7 +730,7 @@ export const App: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation Bar (5 Touch Tabs with Smart Import in CENTER) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 dark:bg-[#181A1C]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 h-16 flex items-center justify-around px-2 shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 dark:bg-[#181A1C]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 h-16 flex items-center justify-around px-2 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
           { id: "overview", label: "ภาพรวม", icon: BarChart2 },
           { id: "transactions", label: "รับ-จ่าย", icon: FileText },

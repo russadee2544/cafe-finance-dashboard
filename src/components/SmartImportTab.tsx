@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   UploadCloud, 
   FileSpreadsheet, 
   Receipt, 
   CheckCircle2, 
   AlertCircle, 
+  AlertTriangle,
   RefreshCw,
   Trash2,
   Database,
@@ -36,7 +37,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
   onSaveGPOSUrl,
   onSyncGPOS,
 }) => {
-  const [activeImportMode, setActiveImportMode] = useState<'gpos' | 'receipt' | 'excel'>('gpos');
+  const [activeImportMode, setActiveImportMode] = useState<'gpos' | 'receipt' | 'excel'>('receipt');
   const [inputGposUrl, setInputGposUrl] = useState<string>(initialGposUrl);
   const [isGposSyncing, setIsGposSyncing] = useState<boolean>(false);
   const [lastSyncSuccess, setLastSyncSuccess] = useState<boolean>(false);
@@ -44,6 +45,8 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
   // --- Receipt OCR State ---
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [scanStatus, setScanStatus] = useState<string>('');
+  const [scanProgress, setScanProgress] = useState<number>(0);
   const [scanResult, setScanResult] = useState<{
     storeName: string;
     date: string;
@@ -54,6 +57,21 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
     items: { name: string; price: number }[];
   } | null>(null);
   const [receiptSaved, setReceiptSaved] = useState<boolean>(false);
+  const [scanError, setScanError] = useState<string>('');
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
+
+  useEffect(() => {
+    const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsTouchDevice(touch);
+  }, []);
+
+  useEffect(() => {
+    if (activeImportMode === 'receipt' && !receiptImage && isTouchDevice) {
+      const t = setTimeout(() => cameraInputRef.current?.click(), 200);
+      return () => clearTimeout(t);
+    }
+  }, [activeImportMode, receiptImage, isTouchDevice]);
 
   // --- Excel Importer State ---
   const [excelFile, setExcelFile] = useState<File | null>(null);
@@ -78,9 +96,25 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
     setReceiptImage(imageUrl);
     setIsScanning(true);
     setReceiptSaved(false);
+    setScanError('');
+    setScanStatus('กำลังโหลดโมเดล OCR...');
+    setScanProgress(0);
 
     try {
-      const result = await parseReceiptImage(file);
+      const result = await parseReceiptImage(file, (status, progress) => {
+        setScanProgress(Math.round(progress * 100));
+        let label = status;
+        if (status.includes('loading tesseract core') || status.includes('initializing tesseract')) {
+          label = 'กำลังโหลดโมเดล OCR...';
+        } else if (status.includes('loading language')) {
+          label = 'กำลังโหลดภาษา (ไทย/อังกฤษ)...';
+        } else if (status.includes('initializing api')) {
+          label = 'กำลังเริ่มระบบสแกน...';
+        } else if (status.includes('recognizing text')) {
+          label = 'กำลังอ่านข้อความจากใบเสร็จ...';
+        }
+        setScanStatus(label);
+      });
       setScanResult({
         storeName: result.storeName,
         date: result.date,
@@ -92,8 +126,17 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
       });
     } catch (err) {
       console.error('OCR Error', err);
+      const message = err instanceof Error ? err.message : String(err);
+      setScanError(
+        message.includes('Network error')
+          ? 'ไม่สามารถดาวน์โหลดโมเดล OCR ได้ กรุณาเชื่อมต่ออินเทอร์เน็ตครั้งแรก แล้วลองใหม่'
+          : `สแกนไม่สำเร็จ: ${message}`,
+      );
+      setScanStatus('');
     } finally {
       setIsScanning(false);
+      setScanProgress(0);
+      setScanStatus('');
     }
   };
 
@@ -180,18 +223,6 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
         <div className="flex items-center bg-[#F1F3F5] dark:bg-white/10 p-1 rounded-full w-full md:w-auto gap-1">
           <button
-            onClick={() => setActiveImportMode('gpos')}
-            className={`flex-1 md:flex-none flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-              activeImportMode === 'gpos'
-                ? 'bg-[#D2E875] text-[#181A1C] shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            <ScanLine className="w-4 h-4 text-emerald-500" />
-            <span>📲 GPOS Sunmi</span>
-          </button>
-
-          <button
             onClick={() => setActiveImportMode('receipt')}
             className={`flex-1 md:flex-none flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
               activeImportMode === 'receipt'
@@ -201,6 +232,18 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
           >
             <Camera className="w-4 h-4" />
             <span>สแกนใบเสร็จ OCR</span>
+          </button>
+
+          <button
+            onClick={() => setActiveImportMode('gpos')}
+            className={`flex-1 md:flex-none flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+              activeImportMode === 'gpos'
+                ? 'bg-[#D2E875] text-[#181A1C] shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            <ScanLine className="w-4 h-4 text-emerald-500" />
+            <span>📲 GPOS Sunmi</span>
           </button>
 
           <button
@@ -345,8 +388,10 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
             <label className="relative flex-1 min-h-[300px] border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-[#D2E875] bg-slate-50 dark:bg-[#141618] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 overflow-hidden">
               <input
+                ref={cameraInputRef}
                 type="file"
                 accept="image/*"
+                capture="environment"
                 onChange={handleReceiptUpload}
                 className="hidden"
               />
@@ -359,7 +404,12 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                     <>
                       <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-[#D2E875]">
                         <RefreshCw className="w-10 h-10 mb-3 animate-spin" />
-                        <span className="text-sm font-bold animate-pulse">กำลังสแกนข้อมูล...</span>
+                        <span className="text-sm font-bold animate-pulse">{scanStatus || 'กำลังสแกนข้อมูล...'}</span>
+                        {scanProgress > 0 && (
+                          <div className="w-40 h-1.5 bg-white/20 rounded-full mt-3 overflow-hidden">
+                            <div className="h-full bg-[#D2E875] rounded-full transition-all" style={{ width: `${Math.min(100, scanProgress)}%` }} />
+                          </div>
+                        )}
                       </div>
                       {/* Scanning line animation */}
                       <div className="absolute left-0 right-0 h-1 bg-[#D2E875] shadow-[0_0_15px_rgba(210,232,117,0.8)] z-30 animate-scan-line"></div>
@@ -378,6 +428,21 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
               )}
             </label>
 
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleReceiptUpload}
+              className="hidden"
+              id="receipt-file-gallery"
+            />
+            <button
+              type="button"
+              onClick={() => document.getElementById('receipt-file-gallery')?.click()}
+              className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white flex items-center gap-1.5 transition-colors"
+            >
+              <UploadCloud className="w-4 h-4" /> เลือกจากอัลบั้ม
+            </button>
+
             {receiptImage && (
               <div className="mt-4 flex justify-end">
                 <button
@@ -385,6 +450,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                     setReceiptImage(null);
                     setScanResult(null);
                     setReceiptSaved(false);
+                    setScanError('');
                   }}
                   className="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-rose-500 flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                 >
@@ -403,7 +469,28 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
             {isScanning ? (
               <div className="flex-1 flex flex-col items-center justify-center text-gray-400 space-y-4">
                 <div className="w-12 h-12 border-4 border-gray-100 border-t-[#D2E875] rounded-full animate-spin"></div>
-                <p className="text-sm font-bold animate-pulse text-gray-800 dark:text-[#D2E875]">กำลังประมวลผล...</p>
+                <p className="text-sm font-bold animate-pulse text-gray-800 dark:text-[#D2E875]">
+                  {scanStatus || 'กำลังประมวลผล...'}
+                </p>
+                {scanProgress > 0 && (
+                  <div className="w-40 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#D2E875] rounded-full transition-all" style={{ width: `${Math.min(100, scanProgress)}%` }} />
+                  </div>
+                )}
+              </div>
+            ) : scanError ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 text-rose-500">
+                <AlertTriangle className="w-10 h-10" />
+                <p className="text-sm font-bold">{scanError}</p>
+                <button
+                  onClick={() => {
+                    setScanError('');
+                    setReceiptImage(null);
+                  }}
+                  className="text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-full transition-colors"
+                >
+                  ลองใหม่
+                </button>
               </div>
             ) : scanResult ? (
               <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
