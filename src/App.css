@@ -1,0 +1,118 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--bg-app);
+}
+
+/* Sidebar: Hidden by default on Mobile & Tablet (< 1024px) */
+.sidebar {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    display: flex !important;
+    width: 280px;
+    height: calc(100vh - 2rem);
+    margin: 1rem;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    z-index: 40;
+    flex-direction: column;
+  }
+  
+  .sidebar.collapsed {
+    width: 88px;
+  }
+}
+
+.main-content {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  padding-bottom: 90px;
+  background-color: var(--bg-app);
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    padding-bottom: 1.5rem;
+  }
+}
+
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  z-index: 50;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 1024px) {
+  .bottom-tab-bar {
+    display: none !important;
+  }
+}
+
+.page-transition {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Sidebar Active Indicator */
+.nav-item-active {
+  color: var(--dark-charcoal) !important;
+  font-weight: 600;
+  background-color: var(--brand-pastel-lime) !important;
+  position: relative;
+}
+
+/* Custom search pill */
+.search-pill {
+  border-radius: 9999px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: white;
+  padding: 0.5rem 3.5rem 0.5rem 2.5rem;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+  transition: all 0.2s;
+}
+.search-pill::placeholder {
+  color: #9CA3AF;
+}
+.search-pill:focus {
+  border-color: var(--brand-pastel-lime);
+  box-shadow: 0 0 0 1px var(--brand-pastel-lime);
+}
+
+.badge-outline {
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background-color: rgba(241, 245, 249, 0.8);
+  color: #0F172A;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+html[data-theme='dark'] .badge-outline,
+html.dark .badge-outline {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
