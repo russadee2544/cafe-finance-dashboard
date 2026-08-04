@@ -1,0 +1,25 @@
+{
+  "short_name": "Baanmai Cafe",
+  "name": "Baanmai Financial - ระบบบริหารการเงินคาเฟ่",
+  "description": "ระบบจัดการการเงิน วิเคราะห์ POS และบริหารหนี้สิน คาเฟ่ ณ บ้านใหม่ ไออุ่น",
+  "icons": [
+    {
+      "src": "/pwa-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#141618",
+  "theme_color": "#181A1C",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/"
+}

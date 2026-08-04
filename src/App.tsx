@@ -9,6 +9,7 @@ import { AddTransactionModal } from "./components/AddTransactionModal";
 import { DailyClosingWizard } from "./components/DailyClosingWizard";
 import { FixedCostEngine } from "./components/FixedCostEngine";
 import { POSSalesAnalyticsTab } from "./components/POSSalesAnalyticsTab";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import type { Transaction, DebtItem, DailySalesRecord, CashFlowRecord } from "./types/finance";
 import {
   saveTransactions,
@@ -792,6 +793,8 @@ export const App: React.FC = () => {
           onSave={handleAddDebt}
         />
       )}
+      {/* PWA Install Prompt for Mobile Devices */}
+      <PWAInstallPrompt />
     </div>
   );
 };
