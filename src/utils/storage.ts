@@ -213,9 +213,11 @@ const GEMINI_API_KEY = 'baanmai_gemini_api_key';
 
 export const getGeminiApiKey = (): string => {
   try {
-    return localStorage.getItem(GEMINI_API_KEY) || '';
+    const stored = localStorage.getItem(GEMINI_API_KEY);
+    if (stored) return stored;
+    return import.meta.env.VITE_GEMINI_API_KEY || '';
   } catch {
-    return '';
+    return import.meta.env.VITE_GEMINI_API_KEY || '';
   }
 };
 
