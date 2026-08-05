@@ -208,3 +208,25 @@ export {
   mergeCashFlow,
 } from './posStorage';
 
+// ===== Gemini API Key Storage =====
+const GEMINI_API_KEY = 'baanmai_gemini_api_key';
+
+export const getGeminiApiKey = (): string => {
+  try {
+    return localStorage.getItem(GEMINI_API_KEY) || '';
+  } catch {
+    return '';
+  }
+};
+
+export const saveGeminiApiKey = (key: string): void => {
+  try {
+    if (key) {
+      localStorage.setItem(GEMINI_API_KEY, key);
+    } else {
+      localStorage.removeItem(GEMINI_API_KEY);
+    }
+  } catch (err) {
+    console.error('Failed to save Gemini API Key to localStorage', err);
+  }
+};

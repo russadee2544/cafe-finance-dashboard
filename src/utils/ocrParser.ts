@@ -1,6 +1,8 @@
 import { createWorker } from 'tesseract.js';
 import type { ReceiptScanResult } from '../types/finance';
 import { parseReceiptText } from './receiptParser';
+import { parseReceiptWithGemini } from './geminiVisionOcr';
+import { getGeminiApiKey } from './storage';
 
 type ProgressCallback = (status: string, progress: number) => void;
 
@@ -86,10 +88,11 @@ async function downscaleToCanvas(file: File, maxDim = 2000): Promise<HTMLCanvasE
   }
 }
 
-export const parseReceiptImage = async (
+// ---------- Tesseract fallback ----------
+async function parseWithTesseract(
   file: File,
   onProgress?: ProgressCallback,
-): Promise<ReceiptScanResult> => {
+): Promise<ReceiptScanResult> {
   const previous = progressCallback;
   progressCallback = onProgress || null;
   try {
@@ -105,4 +108,35 @@ export const parseReceiptImage = async (
   } finally {
     progressCallback = previous;
   }
+}
+
+// ---------- Main entry point ----------
+export const parseReceiptImage = async (
+  file: File,
+  onProgress?: ProgressCallback,
+): Promise<ReceiptScanResult> => {
+  const apiKey = getGeminiApiKey();
+
+  // If Gemini API Key is configured, use Gemini Vision as primary
+  if (apiKey) {
+    try {
+      const geminiResult = await parseReceiptWithGemini(file, apiKey, onProgress);
+      return {
+        storeName: geminiResult.storeName,
+        date: geminiResult.date,
+        totalAmount: geminiResult.totalAmount,
+        category: geminiResult.category,
+        confidence: geminiResult.confidence,
+        rawText: `[Gemini Vision AI] paymentMethod: ${geminiResult.paymentMethod}`,
+        items: geminiResult.items,
+      };
+    } catch (err) {
+      // If Gemini fails, fallback to Tesseract
+      console.warn('Gemini Vision failed, falling back to Tesseract:', err);
+      onProgress?.('Gemini ล้มเหลว กำลังสลับไปใช้ Tesseract OCR...', 0.1);
+    }
+  }
+
+  // Fallback: Tesseract OCR (offline)
+  return parseWithTesseract(file, onProgress);
 };

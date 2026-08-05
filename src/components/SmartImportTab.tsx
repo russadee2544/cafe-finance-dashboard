@@ -10,13 +10,18 @@ import {
   Trash2,
   Database,
   Camera,
-  ScanLine
+  ScanLine,
+  Key,
+  Sparkles,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import type { Transaction, CategoryId, ExcelImportRow } from '../types/finance';
 import { parseReceiptImage } from '../utils/ocrParser';
 import { parseExcelFile, mapRowsToTransactions, parseGoogleSheetURL } from '../utils/excelParser';
 import type { ColumnMapping } from '../utils/excelParser';
 import { CATEGORIES } from '../data/categories';
+import { getGeminiApiKey, saveGeminiApiKey } from '../utils/storage';
 
 interface SmartImportTabProps {
   onAddTransaction: (newTx: Omit<Transaction, 'id' | 'createdAt'>) => void;
@@ -61,6 +66,11 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
 
+  // --- Gemini API Key State ---
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(getGeminiApiKey());
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const isGeminiMode = geminiApiKey.length > 0;
+
   useEffect(() => {
     const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     setIsTouchDevice(touch);
@@ -97,12 +107,13 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
     setIsScanning(true);
     setReceiptSaved(false);
     setScanError('');
-    setScanStatus('กำลังโหลดโมเดล OCR...');
+    setScanStatus(isGeminiMode ? 'กำลังส่งรูปให้ Gemini AI...' : 'กำลังโหลดโมเดล OCR...');
     setScanProgress(0);
 
     try {
       const result = await parseReceiptImage(file, (status, progress) => {
         setScanProgress(Math.round(progress * 100));
+        // Use Gemini-style labels if they come from Gemini, otherwise translate Tesseract labels
         let label = status;
         if (status.includes('loading tesseract core') || status.includes('initializing tesseract')) {
           label = 'กำลังโหลดโมเดล OCR...';
@@ -115,13 +126,20 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
         }
         setScanStatus(label);
       });
+
+      // Detect paymentMethod from Gemini rawText or default
+      let paymentMethod: 'cash' | 'transfer' | 'credit_card' | 'qr' = 'cash';
+      if (result.rawText?.includes('paymentMethod: transfer')) {
+        paymentMethod = 'transfer';
+      }
+
       setScanResult({
         storeName: result.storeName,
         date: result.date,
         totalAmount: result.totalAmount,
         category: result.category,
         description: `ซื้อวัตถุดิบ/ค่าใช้จ่ายจาก ${result.storeName}`,
-        paymentMethod: 'transfer',
+        paymentMethod,
         items: result.items,
       });
     } catch (err) {
@@ -377,7 +395,55 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
       )}
 
       {activeImportMode === 'receipt' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+          {/* Gemini API Key Configuration */}
+          <div className="bg-white dark:bg-[#1F2327] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isGeminiMode ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  {isGeminiMode ? <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" /> : <ScanLine className="w-5 h-5 text-gray-500" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                      {isGeminiMode ? '🤖 Gemini Vision AI' : '📝 Tesseract OCR (Offline)'}
+                    </h4>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isGeminiMode ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                      {isGeminiMode ? 'แม่นยำ 95%+' : 'พื้นฐาน'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {isGeminiMode ? 'AI อ่านใบเสร็จแม่นยำสูง รองรับภาษาไทย' : 'ใส่ Gemini API Key เพื่ออัปเกรดความแม่นยำ'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={geminiApiKey}
+                    onChange={(e) => {
+                      const val = e.target.value.trim();
+                      setGeminiApiKey(val);
+                      saveGeminiApiKey(val);
+                    }}
+                    placeholder="Gemini API Key (จาก aistudio.google.com)"
+                    className="w-full pl-9 pr-10 py-2.5 text-xs bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 outline-none focus:border-purple-400 transition-colors font-mono"
+                  />
+                  <button
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Upload Area */}
           <div className="bg-white dark:bg-[#1F2327] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 flex flex-col shadow-sm">
@@ -593,6 +659,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                 <p className="text-sm font-bold text-gray-700 dark:text-gray-300">สแกนใบเสร็จเพื่อดูข้อมูล</p>
               </div>
             )}
+          </div>
           </div>
         </div>
       )}
