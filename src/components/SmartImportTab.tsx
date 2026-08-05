@@ -13,8 +13,7 @@ import {
   ScanLine,
   Key,
   Sparkles,
-  Eye,
-  EyeOff
+  Plus
 } from 'lucide-react';
 import type { Transaction, CategoryId, ExcelImportRow } from '../types/finance';
 import { parseReceiptImage } from '../utils/ocrParser';
@@ -68,7 +67,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
   // --- Gemini API Key State ---
   const [geminiApiKey, setGeminiApiKey] = useState<string>(getGeminiApiKey());
-  const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const isGeminiMode = geminiApiKey.length > 0;
 
   useEffect(() => {
@@ -165,12 +164,37 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
       type: 'expense',
       amount: scanResult.totalAmount,
       category: scanResult.category,
-      description: scanResult.description,
+      description: scanResult.description.trim() || `ซื้อวัตถุดิบ/ค่าใช้จ่ายจาก ${scanResult.storeName}`,
       paymentMethod: scanResult.paymentMethod,
       receiptUrl: receiptImage || undefined,
       source: 'receipt_ocr',
     });
     setReceiptSaved(true);
+  };
+
+  const handleItemChange = (idx: number, field: 'name' | 'price', value: string) => {
+    if (!scanResult) return;
+    const items = scanResult.items.map((item, i) =>
+      i === idx ? { ...item, [field]: field === 'price' ? (parseFloat(value) || 0) : value } : item,
+    );
+    setScanResult({ ...scanResult, items });
+  };
+
+  const handleRemoveItem = (idx: number) => {
+    if (!scanResult) return;
+    const items = scanResult.items.filter((_, i) => i !== idx);
+    setScanResult({ ...scanResult, items });
+  };
+
+  const handleAddItem = () => {
+    if (!scanResult) return;
+    setScanResult({ ...scanResult, items: [...scanResult.items, { name: '', price: 0 }] });
+  };
+
+  const handleRecalcTotalFromItems = () => {
+    if (!scanResult) return;
+    const total = scanResult.items.reduce((sum, item) => sum + (item.price || 0), 0);
+    setScanResult({ ...scanResult, totalAmount: total });
   };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,7 +236,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
       amount: r.amount,
       category: r.category,
       description: r.description,
-      paymentMethod: (r.paymentMethod as any) || 'transfer',
+      paymentMethod: (r.paymentMethod as 'cash' | 'transfer' | 'credit_card' | 'qr') || 'cash',
       source: 'excel_import',
     }));
 
@@ -230,49 +254,49 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
   const excelStep = getExcelStep();
 
   return (
-    <div className="triton-main-card rounded-[28px] p-8 space-y-6 shadow-sm">
+    <div className="triton-main-card rounded-[28px] p-4 sm:p-6 lg:p-8 space-y-6 shadow-sm">
       
       {/* Header and Tab Switcher */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
           <ScanLine className="w-6 h-6 text-[#181A1C] dark:text-[#D2E875] shrink-0" />
           ระบบสแกนนำเข้าข้อมูลอัตโนมัติ (Smart Import)
         </h2>
 
-        <div className="flex items-center bg-[#F1F3F5] dark:bg-white/10 p-1 rounded-full w-full md:w-auto gap-1">
+        <div className="flex items-center bg-[#F1F3F5] dark:bg-white/10 p-1 rounded-full w-full md:w-auto gap-1 overflow-x-auto">
           <button
             onClick={() => setActiveImportMode('receipt')}
-            className={`flex-1 md:flex-none flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+            className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-300 ${
               activeImportMode === 'receipt'
                 ? 'bg-[#D2E875] text-[#181A1C] shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
             }`}
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-4 h-4 shrink-0" />
             <span>สแกนใบเสร็จ OCR</span>
           </button>
 
           <button
             onClick={() => setActiveImportMode('gpos')}
-            className={`flex-1 md:flex-none flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+            className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-300 ${
               activeImportMode === 'gpos'
                 ? 'bg-[#D2E875] text-[#181A1C] shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
             }`}
           >
-            <ScanLine className="w-4 h-4 text-emerald-500" />
-            <span>📲 GPOS Sunmi</span>
+            <ScanLine className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>GPOS Sunmi</span>
           </button>
 
           <button
             onClick={() => setActiveImportMode('excel')}
-            className={`flex-1 md:flex-none flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+            className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-300 ${
               activeImportMode === 'excel'
                 ? 'bg-[#D2E875] text-[#181A1C] shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-300'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 shrink-0" />
             <span>ไฟล์ Excel ทั่วไป</span>
           </button>
         </div>
@@ -284,9 +308,9 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
           <div className="bg-gradient-to-r from-emerald-900/30 via-[#181A1C] to-emerald-900/10 p-6 rounded-3xl border border-emerald-500/30">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>📲 GPOS Sunmi Automated Connector</span>
-                  <span className="text-xs bg-[#D2E875] text-[#181A1C] px-2.5 py-0.5 rounded-full font-black">LIVE SYNC</span>
+                <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white flex flex-wrap items-center gap-2">
+                  <span>GPOS Sunmi Automated Connector</span>
+                  <span className="text-[10px] sm:text-xs bg-[#D2E875] text-[#181A1C] px-2.5 py-0.5 rounded-full font-black whitespace-nowrap">LIVE SYNC</span>
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   ไม่ต้องกดดาวน์โหลดไฟล์เอง! เชื่อมต่อ Google Sheets Auto-Sync หรืออัปโหลดไฟล์ตรงจากเครื่อง Sunmi
@@ -422,22 +446,17 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                 <div className="relative flex-1 md:w-64">
                   <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
-                    type={showApiKey ? 'text' : 'password'}
-                    value={geminiApiKey}
+                    type="password"
+                    value={apiKeyInput}
                     onChange={(e) => {
                       const val = e.target.value.trim();
+                      setApiKeyInput(val);
                       setGeminiApiKey(val);
                       saveGeminiApiKey(val);
                     }}
-                    placeholder="Gemini API Key (จาก aistudio.google.com)"
+                    placeholder={geminiApiKey ? '•••••••• (บันทึกแล้ว)' : 'Gemini API Key (จาก aistudio.google.com)'}
                     className="w-full pl-9 pr-10 py-2.5 text-xs bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 outline-none focus:border-purple-400 transition-colors font-mono"
                   />
-                  <button
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
                 </div>
               </div>
             </div>
@@ -570,11 +589,21 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5">ชื่อร้าน / รายละเอียด</label>
+                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5">ชื่อร้าน</label>
                     <input
                       type="text"
                       value={scanResult.storeName}
                       onChange={(e) => setScanResult({ ...scanResult, storeName: e.target.value })}
+                      className="w-full bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D2E875]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5">รายละเอียด</label>
+                    <input
+                      type="text"
+                      value={scanResult.description}
+                      onChange={(e) => setScanResult({ ...scanResult, description: e.target.value })}
                       className="w-full bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D2E875]"
                     />
                   </div>
@@ -616,23 +645,78 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                         ))}
                     </select>
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5">วิธีชำระเงิน</label>
+                    <select
+                      value={scanResult.paymentMethod}
+                      onChange={(e) => setScanResult({ ...scanResult, paymentMethod: e.target.value as 'cash' | 'transfer' | 'credit_card' | 'qr' })}
+                      className="w-full bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:outline-none"
+                    >
+                      <option value="cash">เงินสด</option>
+                      <option value="transfer">โอนเงิน</option>
+                      <option value="credit_card">บัตรเครดิต</option>
+                      <option value="qr">QR พร้อมเพย์</option>
+                    </select>
+                  </div>
                 </div>
 
-                {scanResult.items.length > 0 && (
-                  <div className="p-4 bg-gray-50 dark:bg-[#141618] rounded-2xl border border-gray-100 dark:border-gray-800 max-h-40 overflow-y-auto">
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 block mb-3">
-                      รายการที่พบ
+                <div className="p-4 bg-gray-50 dark:bg-[#141618] rounded-2xl border border-gray-100 dark:border-gray-800">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                      รายการที่พบ ({scanResult.items.length})
                     </span>
-                    <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleRecalcTotalFromItems}
+                        className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline whitespace-nowrap"
+                      >
+                        คำนวณยอดรวมจากรายการ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddItem}
+                        className="flex items-center gap-1 text-[10px] font-bold text-[#181A1C] dark:text-[#D2E875] bg-gray-100 dark:bg-white/10 px-2 py-1 rounded-full hover:opacity-80 whitespace-nowrap"
+                      >
+                        <Plus className="w-3 h-3" /> เพิ่ม
+                      </button>
+                    </div>
+                  </div>
+
+                  {scanResult.items.length === 0 ? (
+                    <p className="text-xs text-gray-400 dark:text-gray-500">ยังไม่มีรายการ กด "เพิ่ม" เพื่อเพิ่มรายการ</p>
+                  ) : (
+                    <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
                       {scanResult.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-gray-600 dark:text-gray-300 pb-2 border-b border-gray-200 dark:border-gray-800 last:border-0 last:pb-0">
-                          <span className="truncate pr-2">{item.name}</span>
-                          <span className="font-bold text-gray-900 dark:text-white">฿{item.price.toLocaleString('th-TH')}</span>
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={item.name}
+                            placeholder="ชื่อรายการ"
+                            onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                            className="flex-1 min-w-0 bg-white dark:bg-[#1F2327] border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#D2E875]"
+                          />
+                          <input
+                            type="number"
+                            value={item.price || ''}
+                            placeholder="0"
+                            onChange={(e) => handleItemChange(idx, 'price', e.target.value)}
+                            className="w-24 bg-white dark:bg-[#1F2327] border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white text-right focus:outline-none focus:border-[#D2E875]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(idx)}
+                            className="text-gray-400 hover:text-rose-500 p-1 shrink-0"
+                            aria-label={`ลบรายการ ${idx + 1}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <button
                   onClick={handleSaveReceipt}
@@ -668,7 +752,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* Step Indicator */}
-          <div className="bg-white dark:bg-[#1F2327] p-4 rounded-full border border-gray-200 dark:border-gray-800 flex justify-between items-center relative shadow-sm">
+          <div className="bg-white dark:bg-[#1F2327] p-3 sm:p-4 rounded-2xl sm:rounded-full border border-gray-200 dark:border-gray-800 flex justify-between items-center relative shadow-sm">
              <div className="absolute top-1/2 left-8 right-8 h-0.5 bg-gray-200 dark:bg-gray-800 -translate-y-1/2 z-0 hidden md:block"></div>
              
              {[
@@ -681,8 +765,8 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                const isPast = excelStep > s.step;
                
                return (
-                 <div key={s.step} className="relative z-10 flex flex-col items-center gap-1 flex-1 bg-white dark:bg-[#1F2327] px-2">
-                   <span className={`text-xs md:text-sm font-bold px-3 py-1 rounded-full border-2 ${
+                 <div key={s.step} className="relative z-10 flex flex-col items-center gap-1 flex-1 bg-white dark:bg-[#1F2327] px-1 sm:px-2 min-w-0">
+                   <span className={`text-[10px] sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full border-2 whitespace-nowrap ${
                      isActive ? 'border-[#D2E875] bg-[#D2E875] text-[#181A1C]' :
                      isPast ? 'border-[#D2E875] text-emerald-600 dark:text-[#D2E875] bg-white dark:bg-[#141618]' :
                      'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-white dark:bg-[#141618]'
@@ -731,7 +815,8 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                   { key: 'dateCol', label: 'วันที่ (Date)' },
                   { key: 'descriptionCol', label: 'รายการ (Description)' },
                   { key: 'amountCol', label: 'จำนวนเงิน (Amount)' },
-                  { key: 'categoryCol', label: 'หมวดหมู่ (Category)' }
+                  { key: 'categoryCol', label: 'หมวดหมู่ (Category)' },
+                  { key: 'paymentMethodCol', label: 'ช่องทางชำระเงิน' }
                 ].map((col) => (
                   <div key={col.key}>
                     <label className="block text-xs font-bold text-gray-500 mb-1">{col.label}</label>
@@ -741,6 +826,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 text-sm focus:outline-none focus:border-[#145A38]"
                     >
                       {col.key === 'categoryCol' && <option value="">-- วิเคราะห์อัตโนมัติ --</option>}
+                      {col.key === 'paymentMethodCol' && <option value="">-- ตรวจจับจากรายการ/โอน --</option>}
                       {excelHeaders.map((h) => (
                         <option key={h} value={h}>{h}</option>
                       ))}
@@ -754,7 +840,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
           {/* Step 3 & 4: Preview & Import */}
           {mappedRows.length > 0 && (
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">
                     {excelStep === 3 ? '3. ตรวจสอบข้อมูล' : '4. นำเข้าสำเร็จ'}
@@ -764,7 +850,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                 {excelStep === 3 && (
                   <button
                     onClick={handleSaveExcelBatch}
-                    className="px-6 py-2.5 bg-[#232729] hover:bg-[#181A1C] text-white font-bold rounded-full text-sm transition-colors flex items-center gap-2"
+                    className="px-5 sm:px-6 py-2.5 bg-[#232729] hover:bg-[#181A1C] text-white font-bold rounded-full text-xs sm:text-sm transition-colors flex items-center gap-2 whitespace-nowrap"
                   >
                     <Database className="w-4 h-4" />
                     นำเข้า {mappedRows.filter((r) => r.isValid).length} รายการ
@@ -789,6 +875,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                         <th className="p-3">ประเภท</th>
                         <th className="p-3">รายการ</th>
                         <th className="p-3">หมวดหมู่</th>
+                        <th className="p-3">ช่องทาง</th>
                         <th className="p-3 pr-4 text-right">จำนวนเงิน</th>
                       </tr>
                     </thead>
@@ -818,6 +905,17 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                           <td className="p-3">
                             <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600">
                               {CATEGORIES[row.category]?.name || row.category || '-'}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                              row.paymentMethod === 'transfer'
+                                ? 'bg-blue-50 text-blue-600'
+                                : row.paymentMethod === 'credit_card'
+                                  ? 'bg-purple-50 text-purple-600'
+                                  : 'bg-emerald-50 text-emerald-600'
+                            }`}>
+                              {row.paymentMethod === 'transfer' ? '🏦 เงินโอน' : row.paymentMethod === 'credit_card' ? '💳 บัตร' : '💵 เงินสด'}
                             </span>
                           </td>
                           <td className={`p-3 pr-4 text-right font-bold ${

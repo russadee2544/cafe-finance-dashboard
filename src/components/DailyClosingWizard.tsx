@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import confetti from 'canvas-confetti';
 import type { 
-  Transaction, DebtItem, DailyClosing, FixedCostItem, CafeSettings, DailyAllocation, DailySalesRecord, CashFlowRecord
+  Transaction, DebtItem, DailyClosing, FixedCostItem, CafeSettings, DailyAllocation, DailySalesRecord, CashFlowRecord, CategoryId
 } from '../types/finance';
 import { 
   getStoredFixedCosts, getStoredCafeSettings, getStoredDailyClosings, saveDailyClosings 
@@ -21,14 +21,26 @@ interface DailyClosingWizardProps {
   dailySales?: DailySalesRecord[];
   cashFlow?: CashFlowRecord[];
   onAddTransaction: (tx: Omit<Transaction, 'id' | 'createdAt'>) => void;
+  onUpdateDebt: (debt: DebtItem) => void;
 }
+
+const QUICK_EXPENSE_CATEGORY_MAP: Record<string, CategoryId> = {
+  'กาแฟ/ชา': 'coffee_beans',
+  'นม/ไซรัป': 'dairy_syrup',
+  'เบเกอรี่': 'bakery_food',
+  'บรรจุภัณฑ์': 'packaging',
+  'อื่นๆ': 'other_expense',
+};
+
+const COGS_CASHFLOW_CATEGORIES = ['raw_ice', 'raw_food', 'raw_beverage', 'raw_bakery', 'packaging'];
 
 export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({ 
   transactions, 
   debts, 
   dailySales = [],
   cashFlow = [],
-  onAddTransaction: _onAddTransaction 
+  onAddTransaction,
+  onUpdateDebt
 }) => {
   const [step, setStep] = useState(1);
   const [manualSales, setManualSales] = useState<string>('');
@@ -110,11 +122,22 @@ export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({
   const todaySales = manualSales !== '' ? parseFloat(manualSales) || 0 : autoSales;
   const totalPurchases = autoPurchases + quickExpenses.reduce((sum, e) => sum + e.amount, 0);
 
+  // Actual COGS pulled from POS cash flow (same logic as POS P&L)
+  const actualCogsAmount = useMemo(() => {
+    return cashFlow
+      .filter(c => c.paymentTime.startsWith(selectedDate) && c.type === 'CashOut' && COGS_CASHFLOW_CATEGORIES.includes(c.category))
+      .reduce((sum, c) => sum + Math.abs(c.amount), 0);
+  }, [cashFlow, selectedDate]);
+
+  const effectiveCogsPercent = actualCogsAmount > 0 && todaySales > 0
+    ? (actualCogsAmount / todaySales) * 100
+    : settings.cogsPercent;
+
   // Allocations calculation
   const allocations = useMemo(() => {
     if (todaySales === 0) return [];
 
-    const cogs = todaySales * (settings.cogsPercent / 100);
+    const cogs = actualCogsAmount > 0 ? actualCogsAmount : todaySales * (settings.cogsPercent / 100);
     
     // Calculate daily fixed costs
     let wagesMonthly = 0;
@@ -146,7 +169,7 @@ export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({
     ];
 
     return data;
-  }, [todaySales, settings, fixedCosts]);
+  }, [todaySales, settings, fixedCosts, actualCogsAmount]);
 
   const netProfit = allocations.find(a => a.label === 'กำไรสุทธิจริง')?.amount || 0;
   const totalFixedDaily = allocations
@@ -181,12 +204,24 @@ export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({
   };
 
   const handleSaveClosing = () => {
+    quickExpenses.forEach(exp => {
+      onAddTransaction({
+        date: selectedDate,
+        type: 'expense',
+        amount: exp.amount,
+        category: QUICK_EXPENSE_CATEGORY_MAP[exp.category] || 'other_expense',
+        description: `รายจ่ายด่วน (ปิดยอด): ${exp.category}`,
+        paymentMethod: 'cash',
+        source: 'manual',
+      });
+    });
+
     const newClosing: DailyClosing = {
       id: Date.now().toString(),
       date: selectedDate,
       totalSales: todaySales,
       totalPurchases: totalPurchases,
-      cogsPercent: settings.cogsPercent,
+      cogsPercent: effectiveCogsPercent,
       fixedCostDaily: totalFixedDaily,
       allocations,
       netProfit,
@@ -211,6 +246,47 @@ export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(num);
+  };
+
+  const handlePayDebt = (debt: DebtItem) => {
+    const amountNum = debt.remainingAmount;
+    if (amountNum <= 0) return;
+
+    const updatedHistory = [
+      ...debt.repaymentHistory,
+      {
+        id: `rh-${Date.now()}`,
+        date: selectedDate,
+        amount: amountNum,
+        note: 'ชำระหนี้จากปิดยอดประจำวัน',
+      },
+    ];
+
+    const updated: DebtItem = {
+      ...debt,
+      remainingAmount: 0,
+      status: 'paid',
+      repaymentHistory: updatedHistory,
+    };
+
+    onUpdateDebt(updated);
+
+    onAddTransaction({
+      date: selectedDate,
+      type: 'expense',
+      amount: amountNum,
+      category: 'debt_repayment',
+      description: `ชำระหนี้: ${debt.title} (ปิดยอดประจำวัน)`,
+      paymentMethod: 'transfer',
+      source: 'manual',
+    });
+
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#D2E875', '#10b981', '#ffffff']
+    });
   };
 
   // Stacked chart data format
@@ -450,7 +526,10 @@ export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({
                           <p className="text-sm text-gray-500">คงเหลือ {formatNumber(debt.remainingAmount)}</p>
                         </div>
                       </div>
-                      <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white rounded-full text-sm font-bold transition-all whitespace-nowrap">
+                      <button
+                        onClick={() => handlePayDebt(debt)}
+                        className="px-4 py-2 bg-[#232729] hover:bg-gray-700 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-[#181A1C] rounded-full text-sm font-bold transition-all whitespace-nowrap"
+                      >
                         บันทึกจ่ายหนี้
                       </button>
                     </div>

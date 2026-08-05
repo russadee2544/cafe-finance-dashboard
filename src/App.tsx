@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import { OverviewTab } from "./components/OverviewTab";
 import { DebtMatrixTab } from "./components/DebtMatrixTab";
 import { SmartImportTab } from "./components/SmartImportTab";
 import { TransactionsTab } from "./components/TransactionsTab";
@@ -8,8 +7,7 @@ import { AddDebtModal } from "./components/AddDebtModal";
 import { AddTransactionModal } from "./components/AddTransactionModal";
 import { DailyClosingWizard } from "./components/DailyClosingWizard";
 import { FixedCostEngine } from "./components/FixedCostEngine";
-import { POSSalesAnalyticsTab } from "./components/POSSalesAnalyticsTab";
-import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
+import { DashboardTab } from "./components/DashboardTab";
 import type { Transaction, DebtItem, DailySalesRecord, CashFlowRecord } from "./types/finance";
 import {
   saveTransactions,
@@ -62,12 +60,11 @@ import {
   Moon,
   UploadCloud,
   CalendarCheck,
-  TrendingUp,
 } from "lucide-react";
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "debt_matrix" | "smart_import" | "transactions" | "settings" | "daily_closing" | "pos_analytics"
+    "overview" | "debt_matrix" | "smart_import" | "transactions" | "settings" | "daily_closing"
   >("overview");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [debts, setDebts] = useState<DebtItem[]>([]);
@@ -320,7 +317,6 @@ export const App: React.FC = () => {
 
   const tabs = [
     { id: "overview", label: "ภาพรวมการเงิน", icon: BarChart2 },
-    { id: "pos_analytics", label: "วิเคราะห์ POS", icon: TrendingUp },
     { id: "transactions", label: "รายรับ-รายจ่าย", icon: FileText },
     { id: "daily_closing", label: "ปิดยอดประจำวัน", icon: CalendarCheck },
     { id: "debt_matrix", label: "จัดการหนี้ 4 ช่อง", icon: Compass },
@@ -362,7 +358,7 @@ export const App: React.FC = () => {
     switch (activeTab) {
       case "overview":
         return (
-          <OverviewTab
+          <DashboardTab
             transactions={transactions}
             debts={debts}
             dailySales={dailySales}
@@ -371,13 +367,6 @@ export const App: React.FC = () => {
             onNavigateToTransactions={() => setActiveTab('transactions')}
             onNavigateToSmartImport={() => setActiveTab('smart_import')}
             onOpenAddTransaction={() => setIsAddTxOpen(true)}
-          />
-        );
-      case "pos_analytics":
-        return (
-          <POSSalesAnalyticsTab
-            dailySales={dailySales}
-            cashFlow={cashFlow}
             onImportSales={handleImportDailySales}
             onImportCashFlow={handleImportCashFlow}
             onAddCashFlowRecord={handleAddCashFlowRecord}
@@ -422,6 +411,7 @@ export const App: React.FC = () => {
             dailySales={dailySales}
             cashFlow={cashFlow}
             onAddTransaction={handleAddTransaction}
+            onUpdateDebt={handleUpdateDebt}
           />
         );
 
@@ -793,8 +783,6 @@ export const App: React.FC = () => {
           onSave={handleAddDebt}
         />
       )}
-      {/* PWA Install Prompt for Mobile Devices */}
-      <PWAInstallPrompt />
     </div>
   );
 };

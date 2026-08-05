@@ -431,7 +431,19 @@ html[data-theme='light'] .text-slate-900 {
 
 .triton-main-card {
   border-radius: 28px;
-  padding: 2rem;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .triton-main-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .triton-main-card {
+    padding: 2rem;
+  }
 }
 
 .triton-header {
@@ -474,11 +486,6 @@ html[data-theme='light'] .triton-main-card {
   border: 1px solid #E2E8F0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   color: #0F172A !important;
-}
-
-.triton-main-card {
-  border-radius: 28px;
-  padding: 2rem;
 }
 
 .triton-sidebar {
@@ -548,3 +555,14 @@ html[data-theme='light'] .triton-header {
 
 .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
 .animate-slide-in { animation: slide-in 0.4s ease-out forwards; }
+
+/* Hide scrollbars for horizontal scroll areas */
+.scrollbar-hide,
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar,
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

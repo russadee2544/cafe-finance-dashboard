@@ -319,6 +319,14 @@ export async function parseExcelFile(file: File): Promise<{ headers: string[]; r
   });
 }
 
+export function detectPaymentMethod(raw: string): 'cash' | 'transfer' | 'credit_card' | 'qr' {
+  const t = raw.toLowerCase();
+  if (/บัตร|credit\s*card|card/.test(t)) return 'credit_card';
+  if (/qr\s*cod|qrcode|qr\s*code/.test(t)) return 'qr';
+  if (/โอน|transfer|ธนาคาร|พร้อมเพย์|promptpay|bank|kbank|scb|bbl|ktb|ttb/.test(t)) return 'transfer';
+  return 'cash';
+}
+
 export function mapRowsToTransactions(
   rows: Record<string, any>[],
   mapping: ColumnMapping
@@ -329,7 +337,8 @@ export function mapRowsToTransactions(
     const amountRaw = row[mapping.amountCol];
     const categoryRaw = String(row[mapping.categoryCol] || '').trim();
     const description = String(row[mapping.descriptionCol] || '').trim();
-    const paymentMethod = String(row[mapping.paymentMethodCol] || 'cash').trim();
+    const methodRaw = String(row[mapping.paymentMethodCol] || '').trim();
+    const paymentMethod = detectPaymentMethod(`${methodRaw} ${description}`);
 
     const type = typeRaw.includes('รับ') || typeRaw.includes('income') ? 'income' : 'expense';
     const amount = typeof amountRaw === 'number' ? amountRaw : parseFloat(String(amountRaw).replace(/,/g, '')) || 0;
