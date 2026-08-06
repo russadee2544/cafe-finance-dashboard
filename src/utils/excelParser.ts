@@ -106,7 +106,7 @@ export function autoCategorize(note: string): CashFlowCategory {
   if (['กาแฟ', 'เมล็ด', 'ชาเขียว', 'ชาตรา', 'วิปครีม', 'น้ำเชื่อม', 'ไซรัป', 'นม'].some(k => n.includes(k))) return 'raw_beverage';
   if (['บานอฟฟี่', 'เค้ก', 'ขนม'].some(k => n.includes(k))) return 'raw_bakery';
   if (['ถุง', 'แก้ว', 'หลอด', 'บรรจุ'].some(k => n.includes(k))) return 'packaging';
-  if (['ค่าแรง', 'เงินค่าพนักงาน', 'เบิก', 'วี', 'บังวี'].some(k => n.includes(k))) return 'staff_wages';
+  if (['ค่าแรง', 'เงินค่าพนักงาน', 'เบิก', 'วี', 'บังวี', 'เดะ'].some(k => n.includes(k))) return 'staff_wages';
   if (['กับข้าวพนักงาน', 'อาหารพนักงาน'].some(k => n.includes(k))) return 'staff_meals';
   if (['ค่าน้ำ', 'ค่าไฟ', 'เปลี่ยนน้ำ'].some(k => n.includes(k))) return 'utilities';
   if (['makro', 'ซื้อของ', 'ซื้อของล่วงหน้า', 'แม่ขรี', 'เชียด', 'เหมือง'].some(k => n.includes(k))) return 'wholesale';

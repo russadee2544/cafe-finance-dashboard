@@ -2,19 +2,19 @@ import * as XLSX from 'xlsx';
 import type { Transaction, CategoryId } from '../types/finance';
 
 // Define expected categories for the custom parsing mapping
-const CATEGORY_MAP: Record<string, CategoryId> = {
-  'ค่าของ': 'coffee_beans',
-  'ซื้อของ': 'coffee_beans',
-  'น้ำแข็ง': 'coffee_beans',
-  'วี': 'wages',
-  'ค่าแรง': 'wages',
-  'ค่าพนักงาน': 'wages',
-  'ค่าคนงาน': 'wages',
-  'เดะ': 'wages',
-  'ค่าไฟ': 'utilities',
-  'ค่าเน็ต': 'utilities',
-  'ค่าอุปกรณ์': 'other_expense',
-  'ขาย': 'pos_sales',
+const CATEGORY_MAP: Record<string, { catId: CategoryId; name: string }> = {
+  'ค่าของ': { catId: 'coffee_beans', name: 'ค่าของ (วัตถุดิบ)' },
+  'ซื้อของ': { catId: 'coffee_beans', name: 'ซื้อของ (วัตถุดิบ)' },
+  'น้ำแข็ง': { catId: 'coffee_beans', name: 'น้ำแข็ง' },
+  'วี': { catId: 'wages', name: 'ค่าแรง (วี)' },
+  'ค่าแรง': { catId: 'wages', name: 'ค่าแรง' },
+  'ค่าพนักงาน': { catId: 'wages', name: 'ค่าแรง (พนักงาน)' },
+  'ค่าคนงาน': { catId: 'wages', name: 'ค่าแรง (คนงาน)' },
+  'เดะ': { catId: 'wages', name: 'ค่าแรง (เดะ)' },
+  'ค่าไฟ': { catId: 'utilities', name: 'ค่าไฟ' },
+  'ค่าเน็ต': { catId: 'utilities', name: 'ค่าเน็ต' },
+  'ค่าอุปกรณ์': { catId: 'other_expense', name: 'ค่าอุปกรณ์' },
+  'ขาย': { catId: 'pos_sales', name: 'ยอดขาย' },
 };
 
 const THAI_MONTHS: Record<string, number> = {
@@ -164,7 +164,9 @@ export async function parseCustomExpenseFile(file: File): Promise<ParsedExpenseS
 
               hasValidData = true;
 
-              const categoryId = CATEGORY_MAP[header] || 'other_expense';
+              const catInfo = CATEGORY_MAP[header] || { catId: 'other_expense', name: header };
+              const categoryId = catInfo.catId;
+              const descLabel = catInfo.name;
               
               if (categoryId === 'pos_sales') {
                 hasDailySalesColumn = true;
@@ -175,20 +177,20 @@ export async function parseCustomExpenseFile(file: File): Promise<ParsedExpenseS
                   type: 'income',
                   amount: amount,
                   category: categoryId,
-                  description: `${header}${note ? ` (${note})` : ''}`,
+                  description: `${descLabel}${note ? ` (${note})` : ''}`,
                   paymentMethod: 'cash',
                   source: 'excel_import'
                 });
               } else {
                 dailyTotalExpense += amount;
                 monthTotalExpenses += amount;
-                expenses.push({ category: header, amount, categoryId });
+                expenses.push({ category: descLabel, amount, categoryId });
                 transactions.push({
                   date: dateStr,
                   type: 'expense',
                   amount: amount,
                   category: categoryId,
-                  description: `${header}${note ? ` (${note})` : ''}`,
+                  description: `${descLabel}${note ? ` (${note})` : ''}`,
                   paymentMethod: 'cash',
                   source: 'excel_import'
                 });

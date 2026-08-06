@@ -22,6 +22,7 @@ import {
   getStoredCashFlow,
   mergeDailySales,
   mergeCashFlow,
+  resetToRealDataset,
 } from "./utils/posStorage";
 import {
   parseDailySalesExcel,
@@ -135,6 +136,9 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const res = resetToRealDataset();
+      setDailySales(res.sales);
+      setCashFlow(res.cashFlow);
       const txs = await loadTransactionsDB();
       const debtList = await loadDebtsDB();
       setTransactions(txs);

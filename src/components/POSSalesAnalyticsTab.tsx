@@ -10,7 +10,11 @@ import {
   X,
   AlertCircle,
   Upload,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Search,
+  Eye,
+  ChevronRight,
+  Check
 } from 'lucide-react';
 import {
   BarChart,
@@ -39,7 +43,10 @@ interface POSSalesAnalyticsTabProps {
   onAddCashFlowRecord?: (record: Omit<CashFlowRecord, 'id'>) => void;
 }
 
-const mapCategoryIdToCashFlowCategory = (cat: CategoryId): CashFlowCategory => {
+const mapCategoryIdToCashFlowCategory = (cat: CategoryId, desc: string = ''): CashFlowCategory => {
+  if (desc && desc.includes('น้ำแข็ง')) {
+    return 'raw_ice';
+  }
   switch (cat) {
     case 'coffee_beans':
     case 'dairy_syrup':
@@ -79,22 +86,76 @@ const CATEGORY_META: Record<string, { label: string; color: string; emoji: strin
   other: { label: 'อื่นๆ', color: '#CBD5E1', emoji: '📝' },
 };
 
+const MAIN_CATEGORY_GROUPS: Record<string, { label: string; color: string; emoji: string; subCategories: string[] }> = {
+  raw_beverage: {
+    label: 'วัตถุดิบเครื่องดื่มและของสด',
+    color: '#FCD34D',
+    emoji: '☕',
+    subCategories: ['raw_beverage', 'raw_food', 'raw_bakery', 'wholesale']
+  },
+  raw_ice: {
+    label: 'ค่าน้ำแข็ง',
+    color: '#60A5FA',
+    emoji: '🧊',
+    subCategories: ['raw_ice']
+  },
+  wages: {
+    label: 'ค่าแรงและพนักงาน',
+    color: '#A78BFA',
+    emoji: '👥',
+    subCategories: ['staff_wages', 'staff_meals']
+  },
+  utilities: {
+    label: 'ค่าน้ำ/ค่าไฟ',
+    color: '#38BDF8',
+    emoji: '⚡',
+    subCategories: ['utilities']
+  },
+  packaging_equipment: {
+    label: 'บรรจุภัณฑ์และอุปกรณ์',
+    color: '#34D399',
+    emoji: '📦',
+    subCategories: ['packaging', 'equipment']
+  },
+  other: {
+    label: 'ค่าใช้จ่ายอื่นๆ',
+    color: '#CBD5E1',
+    emoji: '📝',
+    subCategories: ['other']
+  }
+};
+
 const getMonthString = (dateStr: string) => {
-  if (!dateStr) return '';
-  if (dateStr.includes('/')) {
-    const parts = dateStr.split(' ')[0].split('/');
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[1].padStart(2, '0')}`;
+  if (!dateStr || typeof dateStr !== 'string') return '';
+  const trimmed = dateStr.trim();
+  const isoMatch = trimmed.match(/^(\d{4}-\d{2})/);
+  if (isoMatch) {
+    const yyyyMm = isoMatch[1];
+    const monthNum = parseInt(yyyyMm.split('-')[1], 10);
+    if (monthNum >= 1 && monthNum <= 12) {
+      return yyyyMm;
     }
   }
-  return dateStr.substring(0, 7);
+  if (trimmed.includes('/')) {
+    const parts = trimmed.split(' ')[0].split('/');
+    if (parts.length === 3) {
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+      if (year.length === 4 && parseInt(month, 10) >= 1 && parseInt(month, 10) <= 12) {
+        return `${year}-${month}`;
+      }
+    }
+  }
+  return '';
 };
 
 const formatThaiMonth = (yyyyMm: string) => {
   if (!yyyyMm || !yyyyMm.includes('-')) return yyyyMm;
   const [y, m] = yyyyMm.split('-');
+  const monthNum = parseInt(m, 10);
+  if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) return yyyyMm;
   const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  return `${months[parseInt(m, 10) - 1]} ${y}`;
+  return `${months[monthNum - 1]} ${y}`;
 };
 
 export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
@@ -109,6 +170,41 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
   const [activeDashboardView, setActiveDashboardView] = useState<'sales' | 'cashflow' | 'pnl'>('sales');
   const [isAddTransferModalOpen, setIsAddTransferModalOpen] = useState(false);
   const [expenseFilter, setExpenseFilter] = useState<'all' | 'cash' | 'transfer'>('all');
+  const [groupingMode, setGroupingMode] = useState<'consolidated' | 'detailed' | 'custom'>('consolidated');
+  const [selectedCustomCats, setSelectedCustomCats] = useState<string[]>([]);
+
+  // Detail Modal State
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle?: string;
+    items: {
+      id?: string;
+      date: string;
+      description: string;
+      amount: number;
+      category?: string;
+      paymentMethod?: string;
+      type?: 'income' | 'expense';
+    }[];
+  }>({
+    isOpen: false,
+    title: '',
+    items: []
+  });
+
+  const [modalSearch, setModalSearch] = useState('');
+
+  const filteredModalItems = useMemo(() => {
+    if (!modalSearch.trim()) return detailModal.items;
+    const q = modalSearch.toLowerCase();
+    return detailModal.items.filter(
+      item =>
+        item.description.toLowerCase().includes(q) ||
+        item.date.includes(q) ||
+        (item.category && item.category.toLowerCase().includes(q))
+    );
+  }, [detailModal.items, modalSearch]);
   
   const [transferForm, setTransferForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -173,20 +269,20 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
         recipient: '',
         note: t.description,
         amount: -Math.abs(t.amount),
-        category: mapCategoryIdToCashFlowCategory(t.category),
+        category: mapCategoryIdToCashFlowCategory(t.category, t.description),
         paymentMethod: t.paymentMethod === 'transfer' ? 'transfer' as const : t.paymentMethod === 'credit_card' ? 'credit_card' as const : 'cash' as const,
       }));
   }, [transactions]);
 
-  // Merge provided POS records with ones derived from transactions (dedupe by date / signature)
+  // Use provided POS records if present, otherwise fall back to derived ones
   const effectiveDailySales = useMemo(() => {
-    const known = new Set(dailySales.map(r => r.date));
-    return [...dailySales, ...derivedDailySales.filter(r => !known.has(r.date))];
+    if (dailySales && dailySales.length > 0) return dailySales;
+    return derivedDailySales;
   }, [dailySales, derivedDailySales]);
 
   const effectiveCashFlow = useMemo(() => {
-    const known = new Set(cashFlow.map(r => `${r.paymentTime}|${r.amount}|${r.note}`));
-    return [...cashFlow, ...derivedCashFlow.filter(r => !known.has(`${r.paymentTime}|${r.amount}|${r.note}`))];
+    if (cashFlow && cashFlow.length > 0) return cashFlow;
+    return derivedCashFlow;
   }, [cashFlow, derivedCashFlow]);
 
   // Calculate unique months
@@ -194,18 +290,18 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
     const months = new Set<string>();
     effectiveDailySales.forEach(r => {
       const m = getMonthString(r.date);
-      if (m) months.add(m);
+      if (m && /^\d{4}-\d{2}$/.test(m)) months.add(m);
     });
     effectiveCashFlow.forEach(r => {
       const m = getMonthString(r.paymentTime);
-      if (m) months.add(m);
+      if (m && /^\d{4}-\d{2}$/.test(m)) months.add(m);
     });
     return Array.from(months).sort().reverse();
   }, [effectiveDailySales, effectiveCashFlow]);
 
-  // Auto-select latest month on load if 'all' is selected initially and we have data
+  // Auto-select latest month on load if selectedMonth is invalid or 'all'
   useEffect(() => {
-    if (selectedMonth === 'all' && availableMonths.length > 0) {
+    if (availableMonths.length > 0 && (!selectedMonth || selectedMonth === 'all' || !availableMonths.includes(selectedMonth))) {
       setSelectedMonth(availableMonths[0]);
     }
   }, [availableMonths, selectedMonth]);
@@ -242,20 +338,161 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
   }, [filteredCashFlow, expenseFilter]);
 
   const expenseByCategory = useMemo(() => {
-    const groups: Record<string, number> = {};
+    const rawGroups: Record<string, number> = {};
     expensesList.forEach(r => {
-      groups[r.category] = (groups[r.category] || 0) + Math.abs(r.amount);
+      rawGroups[r.category] = (rawGroups[r.category] || 0) + Math.abs(r.amount);
     });
-    return Object.entries(groups)
+
+    if (groupingMode === 'consolidated') {
+      const consolidated: { catKeys: string[]; name: string; value: number; color: string; emoji: string }[] = [];
+      const assignedSubCats = new Set<string>();
+
+      Object.entries(MAIN_CATEGORY_GROUPS).forEach(([_, groupInfo]) => {
+        let sum = 0;
+        const matchedCatKeys: string[] = [];
+        groupInfo.subCategories.forEach(subCat => {
+          if (rawGroups[subCat]) {
+            sum += rawGroups[subCat];
+            matchedCatKeys.push(subCat);
+            assignedSubCats.add(subCat);
+          }
+        });
+        if (sum > 0) {
+          consolidated.push({
+            catKeys: matchedCatKeys,
+            name: groupInfo.label,
+            value: sum,
+            color: groupInfo.color,
+            emoji: groupInfo.emoji
+          });
+        }
+      });
+
+      let otherSum = 0;
+      const unassignedCatKeys: string[] = [];
+      Object.entries(rawGroups).forEach(([cat, amt]) => {
+        if (!assignedSubCats.has(cat)) {
+          otherSum += amt;
+          unassignedCatKeys.push(cat);
+        }
+      });
+      if (otherSum > 0) {
+        consolidated.push({
+          catKeys: unassignedCatKeys,
+          name: 'ค่าใช้จ่ายอื่นๆ',
+          value: otherSum,
+          color: '#CBD5E1',
+          emoji: '📝'
+        });
+      }
+
+      return consolidated.sort((a, b) => b.value - a.value);
+    }
+
+    if (groupingMode === 'custom' && selectedCustomCats.length > 0) {
+      let mergedSum = 0;
+      const mergedCatKeys: string[] = [];
+      const result: { catKeys: string[]; name: string; value: number; color: string; emoji: string }[] = [];
+
+      Object.entries(rawGroups).forEach(([cat, amt]) => {
+        if (selectedCustomCats.includes(cat)) {
+          mergedSum += amt;
+          mergedCatKeys.push(cat);
+        } else {
+          result.push({
+            catKeys: [cat],
+            name: CATEGORY_META[cat as any]?.label || cat,
+            value: amt,
+            color: CATEGORY_META[cat as any]?.color || '#CBD5E1',
+            emoji: CATEGORY_META[cat as any]?.emoji || '📝'
+          });
+        }
+      });
+
+      if (mergedSum > 0) {
+        const mergedNames = selectedCustomCats
+          .map(c => CATEGORY_META[c]?.label || c)
+          .join(', ');
+        result.unshift({
+          catKeys: mergedCatKeys,
+          name: `รวมยอดเลือก (${mergedNames})`,
+          value: mergedSum,
+          color: '#D2E875',
+          emoji: '⚡'
+        });
+      }
+
+      return result.sort((a, b) => b.value - a.value);
+    }
+
+    // Default: 'detailed'
+    return Object.entries(rawGroups)
       .map(([cat, amt]) => ({
+        catKeys: [cat],
         name: CATEGORY_META[cat as any]?.label || cat,
         value: amt,
-        color: CATEGORY_META[cat as any]?.color || '#CBD5E1'
+        color: CATEGORY_META[cat as any]?.color || '#CBD5E1',
+        emoji: CATEGORY_META[cat as any]?.emoji || '📝'
       }))
       .sort((a, b) => b.value - a.value);
-  }, [expensesList]);
+  }, [expensesList, groupingMode, selectedCustomCats]);
 
   const totalExpense = expenseByCategory.reduce((sum, i) => sum + i.value, 0);
+
+  const handleOpenCategoryDetail = (catKeys: string[], catName: string, totalAmount: number) => {
+    const matched = expensesList.filter(item => catKeys.includes(item.category));
+    setModalSearch('');
+    setDetailModal({
+      isOpen: true,
+      title: `รายละเอียดค่าใช้จ่าย: ${catName}`,
+      subtitle: `รวมทั้งหมด ฿${totalAmount.toLocaleString()} (${matched.length} รายการ)`,
+      items: matched.map(m => ({
+        id: m.id,
+        date: m.paymentTime.split(' ')[0],
+        description: m.note || CATEGORY_META[m.category]?.label || catName,
+        amount: Math.abs(m.amount),
+        category: CATEGORY_META[m.category]?.label || m.category,
+        paymentMethod: m.paymentMethod === 'cash' ? 'เงินสด' : m.paymentMethod === 'transfer' ? 'เงินโอน' : 'อื่นๆ',
+        type: 'expense'
+      }))
+    });
+  };
+
+  const handleOpenAllExpensesDetail = () => {
+    setModalSearch('');
+    setDetailModal({
+      isOpen: true,
+      title: 'รายละเอียดรายจ่ายทั้งหมด',
+      subtitle: `รวมรายจ่ายทั้งสิ้น ฿${totalExpense.toLocaleString()} (${expensesList.length} รายการ)`,
+      items: expensesList.map(m => ({
+        id: m.id,
+        date: m.paymentTime.split(' ')[0],
+        description: m.note || CATEGORY_META[m.category]?.label || 'รายจ่าย',
+        amount: Math.abs(m.amount),
+        category: CATEGORY_META[m.category]?.label || m.category,
+        paymentMethod: m.paymentMethod === 'cash' ? 'เงินสด' : m.paymentMethod === 'transfer' ? 'เงินโอน' : 'อื่นๆ',
+        type: 'expense'
+      }))
+    });
+  };
+
+  const handleOpenSalesDetail = () => {
+    setModalSearch('');
+    setDetailModal({
+      isOpen: true,
+      title: 'รายละเอียดรายได้ยอดขาย',
+      subtitle: `รวมยอดขายทั้งสิ้น ฿${salesKpis.totalSales.toLocaleString()} (${filteredSales.length} วัน)`,
+      items: filteredSales.map(s => ({
+        id: `sales-${s.date}`,
+        date: s.date,
+        description: `ยอดขายหน้าร้าน (${s.orderCount} ออเดอร์)`,
+        amount: s.netSales,
+        category: 'ยอดขาย POS',
+        paymentMethod: 'โอน/เงินสด',
+        type: 'income'
+      }))
+    });
+  };
 
   // --- View 3: P&L & MoM Summary Data ---
   const momData = useMemo(() => {
@@ -294,7 +531,7 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
     const totalExp = cashOut + bankTransferOut;
     const grossProfit = salesKpis.totalSales - totalExp;
     
-    const cogsCategories = ['raw_ice', 'raw_food', 'raw_beverage', 'raw_bakery', 'packaging'];
+    const cogsCategories = ['raw_ice', 'raw_food', 'raw_beverage', 'raw_bakery', 'wholesale', 'packaging'];
     const cogsAmount = expensesList
       .filter(r => cogsCategories.includes(r.category))
       .reduce((sum, r) => sum + Math.abs(r.amount), 0);
@@ -364,13 +601,12 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
           <div className="flex items-center gap-2 bg-white dark:bg-[#181A1C] px-3 py-1.5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
             <Calendar className="w-4 h-4 text-gray-400" />
             <select 
-              className="bg-transparent border-none text-xs font-medium text-gray-900 dark:text-white focus:ring-0 cursor-pointer outline-none"
+              className="bg-transparent border-none text-xs font-bold text-gray-900 dark:text-white focus:ring-0 cursor-pointer outline-none"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
             >
-              <option value="all">🌐 ข้อมูลทั้งหมด</option>
               {availableMonths.map(m => (
-                <option key={m} value={m}>{formatThaiMonth(m)}</option>
+                <option key={m} value={m} className="dark:bg-[#181A1C] dark:text-white">{formatThaiMonth(m)}</option>
               ))}
             </select>
           </div>
@@ -418,9 +654,16 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
       {activeDashboardView === 'sales' && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-[#181A1C] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="text-gray-700 dark:text-gray-300 text-xs font-semibold mb-1">ยอดขายรวมสุทธิ (Total Net Sales)</div>
-              <div className="text-2xl font-black text-gray-900 dark:text-white">฿{salesKpis.totalSales.toLocaleString()}</div>
+            <div 
+              onClick={handleOpenSalesDetail}
+              className="bg-white dark:bg-[#181A1C] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm cursor-pointer hover:border-[#D2E875] group transition-all"
+              title="คลิกเพื่อดูรายละเอียดการขายรายวัน"
+            >
+              <div className="text-gray-700 dark:text-gray-300 text-xs font-semibold mb-1 flex items-center justify-between">
+                <span>ยอดขายรวมสุทธิ (Net Sales)</span>
+                <Eye className="w-3.5 h-3.5 text-[#D2E875] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div className="text-2xl font-black text-gray-900 dark:text-white group-hover:text-[#D2E875] transition-colors">฿{salesKpis.totalSales.toLocaleString()}</div>
             </div>
             <div className="bg-white dark:bg-[#181A1C] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
               <div className="text-gray-700 dark:text-gray-300 text-xs font-semibold mb-1">จำนวนออเดอร์ (Total Orders)</div>
@@ -524,7 +767,94 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white dark:bg-[#181A1C] p-5 rounded-2xl border border-gray-100 dark:border-gray-800 lg:col-span-1">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">สัดส่วนรายจ่าย</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">สัดส่วนรายจ่าย</h3>
+                
+                {/* Mode Selector */}
+                <div className="flex bg-gray-100 dark:bg-gray-800/80 p-1 rounded-xl text-[11px] font-bold">
+                  <button
+                    onClick={() => setGroupingMode('consolidated')}
+                    className={`px-2 py-0.5 rounded-lg transition-all ${
+                      groupingMode === 'consolidated'
+                        ? 'bg-white dark:bg-[#141618] text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                    title="รวมหมวดหมู่หลักที่มีชื่อใกล้เคียงกัน"
+                  >
+                    📁 รวมหมวดหลัก
+                  </button>
+                  <button
+                    onClick={() => setGroupingMode('detailed')}
+                    className={`px-2 py-0.5 rounded-lg transition-all ${
+                      groupingMode === 'detailed'
+                        ? 'bg-white dark:bg-[#141618] text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                    title="แยกแสดงผลยอดละเอียดทุกหมวด"
+                  >
+                    🏷️ แยกหมวดย่อย
+                  </button>
+                  <button
+                    onClick={() => setGroupingMode('custom')}
+                    className={`px-2 py-0.5 rounded-lg transition-all ${
+                      groupingMode === 'custom'
+                        ? 'bg-[#D2E875] text-gray-900 shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                    title="เลือกหมวดมารวมยอดเอง"
+                  >
+                    ⚡ รวมยอดเอง
+                  </button>
+                </div>
+              </div>
+
+              {/* Custom Selection Toolbar when groupingMode === 'custom' */}
+              {groupingMode === 'custom' && (
+                <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl text-xs space-y-2">
+                  <div className="font-semibold text-amber-900 dark:text-amber-300 flex items-center justify-between">
+                    <span>เลือกหมวดที่ต้องการนำมารวมยอด:</span>
+                    {selectedCustomCats.length > 0 && (
+                      <button
+                        onClick={() => setSelectedCustomCats([])}
+                        className="text-red-500 hover:underline text-[11px]"
+                      >
+                        ล้างตัวเลือก ({selectedCustomCats.length})
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 custom-scrollbar">
+                    {Object.entries(CATEGORY_META)
+                      .filter(([k]) => k !== 'cash_in')
+                      .map(([k, meta]) => {
+                        const isChecked = selectedCustomCats.includes(k);
+                        return (
+                          <button
+                            key={k}
+                            onClick={() => {
+                              if (isChecked) {
+                                setSelectedCustomCats(selectedCustomCats.filter(c => c !== k));
+                              } else {
+                                setSelectedCustomCats([...selectedCustomCats, k]);
+                              }
+                            }}
+                            className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                              isChecked
+                                ? 'bg-[#D2E875] border-[#D2E875] text-gray-900 shadow-sm font-bold'
+                                : 'bg-white dark:bg-[#141618] border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300'
+                            }`}
+                          >
+                            <span>{meta.emoji} {meta.label}</span>
+                            {isChecked && <Check className="w-3 h-3 text-gray-900" />}
+                          </button>
+                        );
+                      })}
+                  </div>
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400">
+                    * หมวดที่ติ๊กเลือกจะถูกยุบรวมคำนวณเป็นยอดก้อนเดียวกัน
+                  </p>
+                </div>
+              )}
+
               <div className="h-64 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -548,20 +878,35 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">รวมรายจ่าย</span>
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">฿{totalExpense.toLocaleString()}</span>
+                <div 
+                  onClick={handleOpenAllExpensesDetail}
+                  className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer group hover:scale-105 transition-transform"
+                  title="คลิกเพื่อดูรายละเอียดรายจ่ายทั้งหมด"
+                >
+                  <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 group-hover:text-[#D2E875] transition-colors flex items-center gap-1">
+                    <span>รวมรายจ่าย</span>
+                    <Eye className="w-3 h-3 text-[#D2E875]" />
+                  </span>
+                  <span className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-[#D2E875] transition-colors">฿{totalExpense.toLocaleString()}</span>
                 </div>
               </div>
-              <div className="mt-4 space-y-2">
-                {expenseByCategory.slice(0, 5).map(cat => (
-                  <div key={cat.name} className="flex justify-between items-center text-sm">
+              <div className="mt-4 space-y-1.5">
+                {expenseByCategory.map(cat => (
+                  <button
+                    key={cat.name}
+                    onClick={() => handleOpenCategoryDetail(cat.catKeys, cat.name, cat.value)}
+                    className="w-full flex justify-between items-center text-sm p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-gray-800/80 transition-all group cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+                    title={`คลิกดูรายละเอียด: ${cat.name}`}
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                      <span className="text-gray-700 dark:text-gray-300">{cat.name}</span>
+                      <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: cat.color }}></div>
+                      <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-[#D2E875] transition-colors">{cat.name}</span>
                     </div>
-                    <span className="font-medium text-gray-900 dark:text-white">฿{cat.value.toLocaleString()}</span>
-                  </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-gray-900 dark:text-white group-hover:text-[#D2E875] transition-colors">฿{cat.value.toLocaleString()}</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -612,8 +957,15 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">สรุปงบกำไรขาดทุน (P&L Summary)</h3>
               
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-600 dark:text-gray-400 font-medium">ยอดขายสุทธิ (Net Sales)</span>
+                <div 
+                  onClick={handleOpenSalesDetail}
+                  className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/40 p-2 rounded-xl transition-colors group"
+                  title="คลิกเพื่อดูรายละเอียดรายได้ยอดขาย"
+                >
+                  <span className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-green-500 transition-colors flex items-center gap-1.5">
+                    <span>ยอดขายสุทธิ (Net Sales)</span>
+                    <Eye className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </span>
                   <span className="text-xl font-bold text-green-500">฿{salesKpis.totalSales.toLocaleString()}</span>
                 </div>
                 
@@ -628,8 +980,15 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
                   </div>
                 </div>
                 
-                <div className="flex justify-between items-center py-4 border-b border-t border-gray-100 dark:border-gray-800">
-                  <span className="text-gray-900 dark:text-white font-bold">รายจ่ายรวมทั้งหมด (Total Expenses)</span>
+                <div 
+                  onClick={handleOpenAllExpensesDetail}
+                  className="flex justify-between items-center py-4 border-b border-t border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/40 p-2 rounded-xl transition-colors group"
+                  title="คลิกเพื่อดูรายละเอียดรายจ่ายทั้งหมด"
+                >
+                  <span className="text-gray-900 dark:text-white font-bold group-hover:text-red-500 transition-colors flex items-center gap-1.5">
+                    <span>รายจ่ายรวมทั้งหมด (Total Expenses)</span>
+                    <Eye className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </span>
                   <span className="text-lg font-bold text-red-500">-฿{pnlSummary.totalExp.toLocaleString()}</span>
                 </div>
                 
@@ -793,6 +1152,100 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
                 บันทึกรายจ่าย
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAIL BREAKDOWN MODAL */}
+      {detailModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-[#181A1C] border border-gray-200 dark:border-gray-800 rounded-3xl p-6 w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl space-y-4">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-[#D2E875]" />
+                  <span>{detailModal.title}</span>
+                </h3>
+                {detailModal.subtitle && (
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-[#D2E875] mt-1">
+                    {detailModal.subtitle}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => setDetailModal({ ...detailModal, isOpen: false })}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-full bg-gray-100 dark:bg-gray-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Search Filter */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="ค้นหารายการ, วันที่ หรือคีย์เวิร์ด..."
+                value={modalSearch}
+                onChange={(e) => setModalSearch(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-[#D2E875]"
+              />
+            </div>
+
+            {/* Modal Item List */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[400px] custom-scrollbar">
+              {filteredModalItems.length === 0 ? (
+                <div className="text-center py-10 text-gray-400 text-sm font-medium">
+                  ไม่พบบันทึกที่ตรงตามคำค้นหา
+                </div>
+              ) : (
+                filteredModalItems.map((item, idx) => (
+                  <div
+                    key={item.id || idx}
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50 dark:bg-[#141618] hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors border border-gray-100 dark:border-gray-800"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                        item.type === 'income'
+                          ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
+                          : 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400'
+                      }`}>
+                        {item.type === 'income' ? '+' : '-'}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-gray-900 dark:text-white">
+                          {item.description}
+                        </div>
+                        <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                          <span>📅 {item.date}</span>
+                          {item.paymentMethod && <span>• 💳 {item.paymentMethod}</span>}
+                          {item.category && <span className="bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full text-[10px] font-semibold">{item.category}</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`text-sm font-bold shrink-0 pl-2 ${
+                      item.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                    }`}>
+                      {item.type === 'income' ? '+' : '-'}฿{item.amount.toLocaleString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-3 flex justify-between items-center text-xs text-gray-500">
+              <span>แสดง {filteredModalItems.length} จาก {detailModal.items.length} รายการ</span>
+              <button
+                onClick={() => setDetailModal({ ...detailModal, isOpen: false })}
+                className="px-5 py-2 bg-gray-900 dark:bg-gray-700 text-white font-bold rounded-xl hover:bg-gray-800 transition-colors"
+              >
+                ปิด
+              </button>
+            </div>
+
           </div>
         </div>
       )}

@@ -32,7 +32,7 @@ const QUICK_EXPENSE_CATEGORY_MAP: Record<string, CategoryId> = {
   'อื่นๆ': 'other_expense',
 };
 
-const COGS_CASHFLOW_CATEGORIES = ['raw_ice', 'raw_food', 'raw_beverage', 'raw_bakery', 'packaging'];
+const COGS_CASHFLOW_CATEGORIES = ['raw_ice', 'raw_food', 'raw_beverage', 'raw_bakery', 'wholesale', 'packaging'];
 
 export const DailyClosingWizard: React.FC<DailyClosingWizardProps> = ({ 
   transactions, 
