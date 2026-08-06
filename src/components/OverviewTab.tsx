@@ -47,38 +47,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
   // Auto-combine POS sales & cash flow into unified transactions list
   const combinedTransactions = useMemo(() => {
-    const posSalesTxs = convertDailySalesToTransactions(dailySales);
-    const posCashFlowTxs = convertCashFlowToTransactions(cashFlow);
-    
-    const mappedPosSales: Transaction[] = posSalesTxs.map(t => ({
-      ...t,
-      id: `pos-sale-${t.date}`,
-      createdAt: new Date().toISOString(),
-    }));
-    
-    const mappedPosCashFlow: Transaction[] = posCashFlowTxs.map((t, idx) => ({
-      ...t,
-      id: `pos-cf-${idx}`,
-      createdAt: new Date().toISOString(),
-    }));
-
-    // Signatures already covered by POS daily sales / cash flow records,
-    // so excel_import transactions that duplicate them are not counted twice.
-    const posSignatures = new Set<string>();
-    posSalesTxs.forEach(t => posSignatures.add(`${t.date}|pos_sales`));
-    posCashFlowTxs.forEach(t => posSignatures.add(`${t.date}|${t.category}|${t.amount}`));
-
-    // Manual / OCR transactions are always kept. Excel-imported transactions are
-    // kept unless they are already represented by the POS records above.
-    const otherTxs = transactions.filter(t => {
-      if (t.source !== 'excel_import') return true;
-      const sig = t.category === 'pos_sales'
-        ? `${t.date}|pos_sales`
-        : `${t.date}|${t.category}|${t.amount}`;
-      return !posSignatures.has(sig);
-    });
-
-    return [...mappedPosSales, ...mappedPosCashFlow, ...otherTxs];
+    if (transactions && transactions.length > 0) {
+      return transactions;
+    }
+    const posSalesTxs = convertDailySalesToTransactions(dailySales).map((t, idx) => ({ ...t, id: `pos-s-${idx}`, createdAt: new Date().toISOString() }));
+    const posCashFlowTxs = convertCashFlowToTransactions(cashFlow).map((t, idx) => ({ ...t, id: `pos-c-${idx}`, createdAt: new Date().toISOString() }));
+    return [...posSalesTxs, ...posCashFlowTxs];
   }, [transactions, dailySales, cashFlow]);
 
   const now = new Date();
