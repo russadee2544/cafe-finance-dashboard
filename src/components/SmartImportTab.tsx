@@ -18,6 +18,8 @@ import {
 import type { Transaction, CategoryId, ExcelImportRow } from '../types/finance';
 import { parseReceiptImage } from '../utils/ocrParser';
 import { parseExcelFile, mapRowsToTransactions, parseGoogleSheetURL } from '../utils/excelParser';
+import { isCustomExpenseFormat, parseCustomExpenseFile } from '../utils/expenseSheetParser';
+import * as XLSX from 'xlsx';
 import type { ColumnMapping } from '../utils/excelParser';
 import { CATEGORIES } from '../data/categories';
 import { getGeminiApiKey, saveGeminiApiKey } from '../utils/storage';
@@ -205,6 +207,37 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
     setExcelSavedCount(null);
 
     try {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+      
+      if (isCustomExpenseFormat(wb)) {
+        const sheets = await parseCustomExpenseFile(file);
+        const allTx = sheets.flatMap((s) => s.transactions);
+        
+        const customMapped: ExcelImportRow[] = allTx.map((tx) => ({
+          date: tx.date,
+          type: tx.type,
+          amount: tx.amount,
+          category: tx.category,
+          description: tx.description,
+          paymentMethod: tx.paymentMethod,
+          isValid: true,
+        }));
+
+        setExcelHeaders(['วันที่', 'ประเภท', 'รายการ', 'หมวดหมู่', 'จำนวนเงิน']);
+        setRawExcelRows([]);
+        setColumnMapping({
+          dateCol: 'วันที่',
+          typeCol: 'ประเภท',
+          descriptionCol: 'รายการ',
+          categoryCol: 'หมวดหมู่',
+          amountCol: 'จำนวนเงิน',
+          paymentMethodCol: '',
+        });
+        setMappedRows(customMapped);
+        return;
+      }
+
       const { headers, rawRows, suggestedMapping } = await parseExcelFile(file);
       setExcelHeaders(headers);
       setRawExcelRows(rawRows);
@@ -242,6 +275,44 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
     onBatchAddTransactions(newTxs);
     setExcelSavedCount(validRows.length);
+  };
+
+  const handleLoadBaanMaiExpense = async () => {
+    try {
+      const res = await fetch('/ค่าใช้จ่าย-ณ-บ้านใหม่-ไออุ่น.xlsx');
+      if (!res.ok) throw new Error('ไม่พบไฟล์ในระบบ');
+      const blob = await res.blob();
+      const file = new File([blob], 'ค่าใช้จ่าย-ณ-บ้านใหม่-ไออุ่น (จัดระเบียบแล้ว).xlsx');
+      setExcelFile(file);
+      setExcelSavedCount(null);
+
+      const sheets = await parseCustomExpenseFile(file);
+      const allTx = sheets.flatMap((s) => s.transactions);
+
+      const customMapped: ExcelImportRow[] = allTx.map((tx) => ({
+        date: tx.date,
+        type: tx.type,
+        amount: tx.amount,
+        category: tx.category,
+        description: tx.description,
+        paymentMethod: tx.paymentMethod,
+        isValid: true,
+      }));
+
+      setExcelHeaders(['วันที่', 'ประเภท', 'รายการ', 'หมวดหมู่', 'จำนวนเงิน']);
+      setRawExcelRows([]);
+      setColumnMapping({
+        dateCol: 'วันที่',
+        typeCol: 'ประเภท',
+        descriptionCol: 'รายการ',
+        categoryCol: 'หมวดหมู่',
+        amountCol: 'จำนวนเงิน',
+        paymentMethodCol: '',
+      });
+      setMappedRows(customMapped);
+    } catch (err: any) {
+      alert('เกิดข้อผิดพลาดในการโหลดไฟล์: ' + (err.message || String(err)));
+    }
   };
 
   const getExcelStep = () => {
@@ -779,10 +850,20 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
           </div>
 
           {/* Step 1: Upload */}
-          <div className="bg-white dark:bg-[#1F2327] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              1. เลือกไฟล์ Excel
-            </h3>
+          <div className="bg-white dark:bg-[#1F2327] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                1. เลือกไฟล์ Excel
+              </h3>
+              <button
+                type="button"
+                onClick={handleLoadBaanMaiExpense}
+                className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-300 text-xs font-bold rounded-xl hover:bg-amber-100 transition-colors shadow-sm"
+              >
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>⚡ โหลดไฟล์ "ค่าใช้จ่าย-ณ-บ้านใหม่-ไออุ่น.xlsx" ทันที</span>
+              </button>
+            </div>
             
             <label className="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-[#D2E875] bg-slate-50 dark:bg-[#141618] rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all">
               <input
@@ -802,29 +883,31 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
           {/* Step 2: Mapping */}
           {excelHeaders.length > 0 && (
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+            <div className="bg-white dark:bg-[#1F2327] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-bottom-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">2. จับคู่ข้อมูล</h3>
-                <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">2. จับคู่ข้อมูล</h3>
+                <span className="text-xs font-bold px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
                   พบ {mappedRows.length} แถว
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {[
                   { key: 'dateCol', label: 'วันที่ (Date)' },
+                  { key: 'typeCol', label: 'ประเภท (รับ/จ่าย)' },
                   { key: 'descriptionCol', label: 'รายการ (Description)' },
                   { key: 'amountCol', label: 'จำนวนเงิน (Amount)' },
                   { key: 'categoryCol', label: 'หมวดหมู่ (Category)' },
                   { key: 'paymentMethodCol', label: 'ช่องทางชำระเงิน' }
                 ].map((col) => (
                   <div key={col.key}>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">{col.label}</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">{col.label}</label>
                     <select
                       value={columnMapping[col.key as keyof ColumnMapping] as string}
                       onChange={(e) => handleMappingChange(col.key as keyof ColumnMapping, e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-gray-900 text-sm focus:outline-none focus:border-[#145A38]"
+                      className="w-full bg-gray-50 dark:bg-[#141618] border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D2E875]"
                     >
+                      {col.key === 'typeCol' && <option value="">-- ตรวจจับจากยอดเงิน (บวก/ลบ) --</option>}
                       {col.key === 'categoryCol' && <option value="">-- วิเคราะห์อัตโนมัติ --</option>}
                       {col.key === 'paymentMethodCol' && <option value="">-- ตรวจจับจากรายการ/โอน --</option>}
                       {excelHeaders.map((h) => (
@@ -839,10 +922,10 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
 
           {/* Step 3 & 4: Preview & Import */}
           {mappedRows.length > 0 && (
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+            <div className="bg-white dark:bg-[#1F2327] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-bottom-4">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                     {excelStep === 3 ? '3. ตรวจสอบข้อมูล' : '4. นำเข้าสำเร็จ'}
                   </h3>
                 </div>
@@ -859,16 +942,16 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
               </div>
 
               {excelSavedCount !== null && (
-                <div className="mb-4 p-4 bg-emerald-50 text-emerald-700 rounded-2xl text-sm font-bold flex items-center gap-2">
+                <div className="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-2xl text-sm font-bold flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5" />
                   นำเข้าข้อมูลทั้งหมด {excelSavedCount} รายการเรียบร้อยแล้ว
                 </div>
               )}
 
-              <div className="rounded-2xl border border-gray-100 overflow-hidden bg-white">
+              <div className="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-[#141618]">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-gray-600">
-                    <thead className="bg-gray-50 text-gray-500 font-medium">
+                  <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+                    <thead className="bg-gray-50 dark:bg-[#1A1D20] text-gray-500 dark:text-gray-400 font-medium">
                       <tr>
                         <th className="p-3 pl-4">สถานะ</th>
                         <th className="p-3">วันที่</th>
@@ -879,7 +962,7 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                         <th className="p-3 pr-4 text-right">จำนวนเงิน</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {mappedRows.slice(0, 10).map((row, idx) => (
                         <tr key={idx}>
                           <td className="p-3 pl-4">
@@ -901,9 +984,9 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                               {row.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
                             </span>
                           </td>
-                          <td className="p-3 font-medium text-gray-900 truncate max-w-[150px]">{row.description}</td>
+                          <td className="p-3 font-medium text-gray-900 dark:text-white truncate max-w-[150px]">{row.description}</td>
                           <td className="p-3">
-                            <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600">
+                            <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                               {CATEGORIES[row.category]?.name || row.category || '-'}
                             </span>
                           </td>
@@ -930,8 +1013,8 @@ export const SmartImportTab: React.FC<SmartImportTabProps> = ({
                 </div>
                 
                 {mappedRows.length > 10 && (
-                  <div className="p-3 bg-gray-50 border-t border-gray-100 text-center">
-                    <p className="text-xs font-bold text-gray-500">
+                  <div className="p-3 bg-gray-50 dark:bg-[#1A1D20] border-t border-gray-100 dark:border-gray-800 text-center">
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
                       แสดง 10 รายการแรก จากทั้งหมด {mappedRows.length} รายการ
                     </p>
                   </div>

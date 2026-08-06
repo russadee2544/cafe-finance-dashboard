@@ -79,6 +79,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
         <POSSalesAnalyticsTab
           dailySales={dailySales}
           cashFlow={cashFlow}
+          transactions={transactions}
           onImportSales={onImportSales}
           onImportCashFlow={onImportCashFlow}
           onAddCashFlowRecord={onAddCashFlowRecord}

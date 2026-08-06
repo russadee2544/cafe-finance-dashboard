@@ -301,9 +301,9 @@ export async function parseExcelFile(file: File): Promise<{ headers: string[]; r
         const findCol = (keywords: string[]) => headers.find(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase()))) || '';
 
         const suggestedMapping: ColumnMapping = {
-          dateCol: findCol(['วัน', 'date', 'time']),
+          dateCol: findCol(['วัน', 'date', 'time', 'เวลา']),
           typeCol: findCol(['ประเภท', 'type', 'kind']),
-          amountCol: findCol(['จำนวน', 'ยอด', 'ราคา', 'amount', 'price', 'total']),
+          amountCol: findCol(['จำนวน', 'ยอด', 'ราคา', 'amount', 'price', 'total', 'รายรับ', 'รายจ่าย', '(฿)']),
           categoryCol: findCol(['หมวด', 'cat']),
           descriptionCol: findCol(['รายละเอียด', 'โน้ต', 'รายการ', 'desc', 'note']),
           paymentMethodCol: findCol(['ชำระ', 'วิธี', 'method', 'pay'])
@@ -332,7 +332,7 @@ export function mapRowsToTransactions(
   mapping: ColumnMapping
 ): ExcelImportRow[] {
   return rows.map((row) => {
-    const dateRaw = String(row[mapping.dateCol] || '').trim();
+    let dateRaw = String(row[mapping.dateCol] || '').trim();
     const typeRaw = String(row[mapping.typeCol] || '').toLowerCase();
     const amountRaw = row[mapping.amountCol];
     const categoryRaw = String(row[mapping.categoryCol] || '').trim();
@@ -340,8 +340,38 @@ export function mapRowsToTransactions(
     const methodRaw = String(row[mapping.paymentMethodCol] || '').trim();
     const paymentMethod = detectPaymentMethod(`${methodRaw} ${description}`);
 
-    const type = typeRaw.includes('รับ') || typeRaw.includes('income') ? 'income' : 'expense';
-    const amount = typeof amountRaw === 'number' ? amountRaw : parseFloat(String(amountRaw).replace(/,/g, '')) || 0;
+    // Strip time portion from datetime strings like "2026-07-30 17:48:18"
+    if (dateRaw.match(/^\d{4}-\d{2}-\d{2}\s/)) {
+      dateRaw = dateRaw.split(' ')[0];
+    }
+    // Convert DD/MM/YYYY to YYYY-MM-DD
+    const dateParts = dateRaw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dateParts) {
+      dateRaw = `${dateParts[3]}-${dateParts[2].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+    }
+
+    // Detect type: support CashIn/CashOut, รับ/จ่าย, income/expense
+    const isCashIn = typeRaw.includes('cashin') || typeRaw.includes('cash_in');
+    const isIncome = typeRaw.includes('รับ') || typeRaw.includes('income') || isCashIn;
+    const type = isIncome ? 'income' : 'expense';
+
+    // Parse amount: handle negative strings like "-200.00" and take absolute value
+    let parsedAmount = typeof amountRaw === 'number' ? amountRaw : parseFloat(String(amountRaw).replace(/,/g, '')) || 0;
+    const absAmount = Math.abs(parsedAmount);
+
+    // Auto-detect type from negative amount if type column is empty/missing
+    const finalType = (!mapping.typeCol && parsedAmount > 0) ? 'income' : 
+                      (!mapping.typeCol && parsedAmount < 0) ? 'expense' : type;
+
+    // Auto-categorize from description if no category column mapped
+    let finalCategory: CategoryId = (categoryRaw as CategoryId) || 'other_expense';
+    if (!categoryRaw && description) {
+      const autoCat = autoCategorize(description);
+      finalCategory = mapCashFlowCategoryToCategoryId(autoCat);
+      if (finalType === 'income') finalCategory = 'other_income';
+    } else if (finalType === 'income' && finalCategory === 'other_expense') {
+      finalCategory = 'other_income';
+    }
     
     let isValid = true;
     let error = '';
@@ -349,16 +379,16 @@ export function mapRowsToTransactions(
     if (!dateRaw) {
       isValid = false;
       error = 'ไม่มีวันที่';
-    } else if (amount <= 0) {
+    } else if (absAmount <= 0) {
       isValid = false;
       error = 'จำนวนเงินต้องมากกว่า 0';
     }
 
     return {
       date: dateRaw,
-      type,
-      amount,
-      category: (categoryRaw as CategoryId) || 'other_expense',
+      type: finalType,
+      amount: absAmount,
+      category: finalCategory,
       description,
       paymentMethod,
       isValid,

@@ -28,15 +28,41 @@ import {
   Line,
   ComposedChart
 } from 'recharts';
-import type { DailySalesRecord, CashFlowRecord } from '../types/finance';
+import type { DailySalesRecord, CashFlowRecord, CashFlowCategory, Transaction, CategoryId } from '../types/finance';
 
 interface POSSalesAnalyticsTabProps {
   dailySales: DailySalesRecord[];
   cashFlow: CashFlowRecord[];
+  transactions?: Transaction[];
   onImportSales: (file: File) => void;
   onImportCashFlow: (file: File) => void;
   onAddCashFlowRecord?: (record: Omit<CashFlowRecord, 'id'>) => void;
 }
+
+const mapCategoryIdToCashFlowCategory = (cat: CategoryId): CashFlowCategory => {
+  switch (cat) {
+    case 'coffee_beans':
+    case 'dairy_syrup':
+      return 'raw_beverage';
+    case 'bakery_food':
+      return 'raw_food';
+    case 'packaging':
+      return 'packaging';
+    case 'wages':
+      return 'staff_wages';
+    case 'utilities':
+      return 'utilities';
+    case 'pos_sales':
+    case 'delivery_sales':
+    case 'other_income':
+      return 'cash_in';
+    case 'rent':
+    case 'debt_repayment':
+    case 'other_expense':
+    default:
+      return 'other';
+  }
+};
 
 const CATEGORY_META: Record<string, { label: string; color: string; emoji: string }> = {
   raw_ice: { label: 'น้ำแข็ง', color: '#60A5FA', emoji: '🧊' },
@@ -74,6 +100,7 @@ const formatThaiMonth = (yyyyMm: string) => {
 export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
   dailySales,
   cashFlow,
+  transactions = [],
   onImportSales,
   onImportCashFlow,
   onAddCashFlowRecord
@@ -106,19 +133,75 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
     }
   };
 
+  // Build POS daily-sales records from imported transactions (excel_import etc.)
+  // so the analytics dashboard shows real data even without separate POS exports.
+  const derivedDailySales = useMemo<DailySalesRecord[]>(() => {
+    const byDate = new Map<string, { net: number; count: number }>();
+    transactions
+      .filter(t => t.type === 'income' && (t.category === 'pos_sales' || t.category === 'delivery_sales'))
+      .forEach(t => {
+        const cur = byDate.get(t.date) || { net: 0, count: 0 };
+        cur.net += t.amount;
+        cur.count += 1;
+        byDate.set(t.date, cur);
+      });
+    return Array.from(byDate.entries())
+      .map(([date, v]) => ({
+        date,
+        channel: 'ALL',
+        salesChannel: 'ALL',
+        totalSales: v.net,
+        orderCount: v.count,
+        netSales: v.net,
+        serviceFee: 0,
+        discount: 0,
+        tax: 0,
+        tip: 0,
+        rounding: 0,
+        deliveryFee: 0,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [transactions]);
+
+  const derivedCashFlow = useMemo<CashFlowRecord[]>(() => {
+    return transactions
+      .filter(t => t.type === 'expense')
+      .map(t => ({
+        id: t.id,
+        paymentTime: `${t.date} 12:00:00`,
+        type: 'CashOut' as const,
+        recipient: '',
+        note: t.description,
+        amount: -Math.abs(t.amount),
+        category: mapCategoryIdToCashFlowCategory(t.category),
+        paymentMethod: t.paymentMethod === 'transfer' ? 'transfer' as const : t.paymentMethod === 'credit_card' ? 'credit_card' as const : 'cash' as const,
+      }));
+  }, [transactions]);
+
+  // Merge provided POS records with ones derived from transactions (dedupe by date / signature)
+  const effectiveDailySales = useMemo(() => {
+    const known = new Set(dailySales.map(r => r.date));
+    return [...dailySales, ...derivedDailySales.filter(r => !known.has(r.date))];
+  }, [dailySales, derivedDailySales]);
+
+  const effectiveCashFlow = useMemo(() => {
+    const known = new Set(cashFlow.map(r => `${r.paymentTime}|${r.amount}|${r.note}`));
+    return [...cashFlow, ...derivedCashFlow.filter(r => !known.has(`${r.paymentTime}|${r.amount}|${r.note}`))];
+  }, [cashFlow, derivedCashFlow]);
+
   // Calculate unique months
   const availableMonths = useMemo(() => {
     const months = new Set<string>();
-    dailySales.forEach(r => {
+    effectiveDailySales.forEach(r => {
       const m = getMonthString(r.date);
       if (m) months.add(m);
     });
-    cashFlow.forEach(r => {
+    effectiveCashFlow.forEach(r => {
       const m = getMonthString(r.paymentTime);
       if (m) months.add(m);
     });
     return Array.from(months).sort().reverse();
-  }, [dailySales, cashFlow]);
+  }, [effectiveDailySales, effectiveCashFlow]);
 
   // Auto-select latest month on load if 'all' is selected initially and we have data
   useEffect(() => {
@@ -129,14 +212,14 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
 
   // Filter Data by Month
   const filteredSales = useMemo(() => {
-    if (selectedMonth === 'all') return dailySales;
-    return dailySales.filter(r => getMonthString(r.date) === selectedMonth);
-  }, [dailySales, selectedMonth]);
+    if (selectedMonth === 'all') return effectiveDailySales;
+    return effectiveDailySales.filter(r => getMonthString(r.date) === selectedMonth);
+  }, [effectiveDailySales, selectedMonth]);
 
   const filteredCashFlow = useMemo(() => {
-    if (selectedMonth === 'all') return cashFlow;
-    return cashFlow.filter(r => getMonthString(r.paymentTime) === selectedMonth);
-  }, [cashFlow, selectedMonth]);
+    if (selectedMonth === 'all') return effectiveCashFlow;
+    return effectiveCashFlow.filter(r => getMonthString(r.paymentTime) === selectedMonth);
+  }, [effectiveCashFlow, selectedMonth]);
 
   // --- View 1: POS Sales Analytics Data ---
   const salesKpis = useMemo(() => {
@@ -185,12 +268,12 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
       monthlyStats[m] = { sales: 0, expenses: 0 };
     });
 
-    dailySales.forEach(r => {
+    effectiveDailySales.forEach(r => {
       const m = getMonthString(r.date);
       if (monthlyStats[m]) monthlyStats[m].sales += r.netSales;
     });
 
-    cashFlow.forEach(r => {
+    effectiveCashFlow.forEach(r => {
       const m = getMonthString(r.paymentTime);
       if (monthlyStats[m] && r.type === 'CashOut') {
         monthlyStats[m].expenses += Math.abs(r.amount);
@@ -203,7 +286,7 @@ export const POSSalesAnalyticsTab: React.FC<POSSalesAnalyticsTabProps> = ({
       expenses: monthlyStats[m].expenses,
       profit: monthlyStats[m].sales - monthlyStats[m].expenses
     }));
-  }, [dailySales, cashFlow, availableMonths]);
+  }, [effectiveDailySales, effectiveCashFlow, availableMonths]);
 
   const pnlSummary = useMemo(() => {
     const cashOut = filteredCashFlow.filter(r => r.type === 'CashOut' && r.paymentMethod !== 'transfer').reduce((sum, r) => sum + Math.abs(r.amount), 0);

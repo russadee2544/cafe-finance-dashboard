@@ -62,8 +62,22 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       createdAt: new Date().toISOString(),
     }));
 
-    // Keep manual transactions or OCR transactions that don't duplicate POS dates
-    const otherTxs = transactions.filter(t => t.source !== 'excel_import');
+    // Signatures already covered by POS daily sales / cash flow records,
+    // so excel_import transactions that duplicate them are not counted twice.
+    const posSignatures = new Set<string>();
+    posSalesTxs.forEach(t => posSignatures.add(`${t.date}|pos_sales`));
+    posCashFlowTxs.forEach(t => posSignatures.add(`${t.date}|${t.category}|${t.amount}`));
+
+    // Manual / OCR transactions are always kept. Excel-imported transactions are
+    // kept unless they are already represented by the POS records above.
+    const otherTxs = transactions.filter(t => {
+      if (t.source !== 'excel_import') return true;
+      const sig = t.category === 'pos_sales'
+        ? `${t.date}|pos_sales`
+        : `${t.date}|${t.category}|${t.amount}`;
+      return !posSignatures.has(sig);
+    });
+
     return [...mappedPosSales, ...mappedPosCashFlow, ...otherTxs];
   }, [transactions, dailySales, cashFlow]);
 
