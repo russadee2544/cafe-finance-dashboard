@@ -2,15 +2,48 @@ import type { Transaction, DailySalesRecord, CashFlowRecord } from '../types/fin
 
 export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
   {
+    "id": "tx-sales-2026-08-06",
+    "date": "2026-08-06",
+    "type": "income",
+    "amount": 4973,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (27 ออเดอร์) (คืนเงิน 215 บาท (ยอดก่อนคืน 5,188 บาท))",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-08-06T18:00:00.000Z"
+  },
+  {
+    "id": "tx-exp-2026-08-06-2",
+    "date": "2026-08-06",
+    "type": "expense",
+    "amount": 1960,
+    "category": "coffee_beans",
+    "description": "ซื้อของ (วัตถุดิบ) (คืนเงิน 215 บาท (ยอดก่อนคืน 5,188 บาท))",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-08-06T18:00:00.000Z"
+  },
+  {
+    "id": "tx-exp-2026-08-06-3",
+    "date": "2026-08-06",
+    "type": "expense",
+    "amount": 5400,
+    "category": "wages",
+    "description": "ค่าแรง (พนักงาน) (คืนเงิน 215 บาท (ยอดก่อนคืน 5,188 บาท))",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-08-06T18:00:00.000Z"
+  },
+  {
     "id": "tx-sales-2026-08-05",
     "date": "2026-08-05",
     "type": "income",
     "amount": 4850,
     "category": "pos_sales",
-    "description": "ยอดขาย POS (26 ออเดอร์)",
+    "description": "ยอดขาย POS (26 ออเดอร์) (จ่ายบังนัน)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-08-05T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-05-2",
@@ -21,7 +54,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ซื้อของ (วัตถุดิบ) (จ่ายบังนัน)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-05-4",
@@ -32,7 +65,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (จ่ายบังนัน)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-05-7",
@@ -43,7 +76,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (คนงาน) (จ่ายบังนัน)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-08-04",
@@ -51,10 +84,10 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "type": "income",
     "amount": 1422,
     "category": "pos_sales",
-    "description": "ยอดขาย POS (8 ออเดอร์)",
+    "description": "ยอดขาย POS (8 ออเดอร์) (*มัทฉะกาแฟเก็บออม7485 | คืนเงิน 65 บาท (ยอดก่อนคืน 1,487 บาท))",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-08-05T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-04-2",
@@ -62,10 +95,10 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "type": "expense",
     "amount": 9337,
     "category": "coffee_beans",
-    "description": "ซื้อของ (วัตถุดิบ) (*มัทฉะกาแฟเก็บออม7485)",
+    "description": "ซื้อของ (วัตถุดิบ) (*มัทฉะกาแฟเก็บออม7485 | คืนเงิน 65 บาท (ยอดก่อนคืน 1,487 บาท))",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-04-4",
@@ -73,10 +106,10 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "type": "expense",
     "amount": 100,
     "category": "wages",
-    "description": "ค่าแรง (วี) (*มัทฉะกาแฟเก็บออม7485)",
+    "description": "ค่าแรง (วี) (*มัทฉะกาแฟเก็บออม7485 | คืนเงิน 65 บาท (ยอดก่อนคืน 1,487 บาท))",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-08-03",
@@ -87,7 +120,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ยอดขาย POS (32 ออเดอร์)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-08-05T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-03-2",
@@ -98,7 +131,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ซื้อของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-03-4",
@@ -109,7 +142,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-08-02",
@@ -120,7 +153,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ยอดขาย POS (29 ออเดอร์)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-08-05T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-02-2",
@@ -131,7 +164,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ซื้อของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-02-3",
@@ -142,7 +175,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (พนักงาน)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-02-5",
@@ -153,7 +186,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (เดะ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-02-6",
@@ -164,7 +197,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าอุปกรณ์",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-08-01",
@@ -172,10 +205,10 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "type": "income",
     "amount": 4727,
     "category": "pos_sales",
-    "description": "ยอดขาย POS (26 ออเดอร์)",
+    "description": "ยอดขาย POS (26 ออเดอร์) (คืนเงิน 1,172 บาท (ยอดก่อนคืน 5,899 บาท))",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-08-05T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-01-2",
@@ -183,10 +216,10 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "type": "expense",
     "amount": 350,
     "category": "coffee_beans",
-    "description": "ซื้อของ (วัตถุดิบ)",
+    "description": "ซื้อของ (วัตถุดิบ) (คืนเงิน 1,172 บาท (ยอดก่อนคืน 5,899 บาท))",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-08-01-4",
@@ -194,10 +227,10 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "type": "expense",
     "amount": 100,
     "category": "wages",
-    "description": "ค่าแรง (วี)",
+    "description": "ค่าแรง (วี) (คืนเงิน 1,172 บาท (ยอดก่อนคืน 5,899 บาท))",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-30",
@@ -219,7 +252,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ) (สูบัด4000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-30-2",
@@ -230,7 +263,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง (สูบัด4000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-30-3",
@@ -241,7 +274,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (สูบัด4000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-30-4",
@@ -252,7 +285,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (สูบัด4000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-30-5",
@@ -263,7 +296,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (เดะ) (สูบัด4000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-29",
@@ -285,7 +318,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-29-2",
@@ -296,7 +329,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-29-3",
@@ -307,7 +340,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-29-4",
@@ -318,7 +351,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-28",
@@ -340,7 +373,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-28-2",
@@ -351,7 +384,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-28-3",
@@ -362,7 +395,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-27",
@@ -384,7 +417,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-27-2",
@@ -395,7 +428,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-27-3",
@@ -406,7 +439,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-27-4",
@@ -417,7 +450,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-26",
@@ -439,7 +472,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-26-2",
@@ -450,7 +483,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-26-3",
@@ -461,7 +494,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-26-4",
@@ -472,7 +505,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-25",
@@ -494,7 +527,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-25-2",
@@ -505,7 +538,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-25-3",
@@ -516,7 +549,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-23",
@@ -538,7 +571,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-23-2",
@@ -549,7 +582,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-23-3",
@@ -560,7 +593,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-23-4",
@@ -571,7 +604,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-22",
@@ -593,7 +626,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-22-2",
@@ -604,7 +637,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-22-3",
@@ -615,7 +648,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-21",
@@ -637,7 +670,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-21-2",
@@ -648,7 +681,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-21-3",
@@ -659,7 +692,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-20",
@@ -681,7 +714,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-20-2",
@@ -692,7 +725,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-20-3",
@@ -703,7 +736,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-19",
@@ -725,7 +758,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-19-2",
@@ -736,7 +769,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-19-3",
@@ -747,7 +780,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-19-4",
@@ -758,7 +791,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-19-7",
@@ -769,7 +802,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าเน็ต",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-18",
@@ -791,7 +824,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-18-2",
@@ -802,7 +835,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-18-3",
@@ -813,7 +846,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-18-4",
@@ -824,7 +857,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-16",
@@ -846,7 +879,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ) (คืนซา 1000+800)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-16-2",
@@ -857,7 +890,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง (คืนซา 1000+800)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-16-3",
@@ -868,7 +901,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (คืนซา 1000+800)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-16-4",
@@ -879,7 +912,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (คืนซา 1000+800)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-15",
@@ -901,7 +934,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-15-2",
@@ -912,7 +945,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-15-3",
@@ -923,7 +956,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-15-4",
@@ -934,7 +967,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-14",
@@ -956,7 +989,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ) (คืนซา2000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-14-2",
@@ -967,7 +1000,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง (คืนซา2000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-14-3",
@@ -978,7 +1011,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (คืนซา2000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-14-4",
@@ -989,7 +1022,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (คืนซา2000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-14-6",
@@ -1000,7 +1033,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าไฟ (คืนซา2000)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-13",
@@ -1022,7 +1055,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-13-2",
@@ -1033,7 +1066,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-13-3",
@@ -1044,7 +1077,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-13-4",
@@ -1055,7 +1088,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-12",
@@ -1077,7 +1110,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-12-2",
@@ -1088,7 +1121,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-12-3",
@@ -1099,7 +1132,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-11",
@@ -1121,7 +1154,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-11-2",
@@ -1132,7 +1165,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-11-3",
@@ -1143,7 +1176,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-09",
@@ -1165,7 +1198,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-09-2",
@@ -1176,7 +1209,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-09-3",
@@ -1187,7 +1220,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-09-4",
@@ -1198,7 +1231,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-08",
@@ -1220,7 +1253,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ) (เคลียร์ยอดงด.เดะหมด)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-08-2",
@@ -1231,7 +1264,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง (เคลียร์ยอดงด.เดะหมด)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-08-3",
@@ -1242,7 +1275,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (เคลียร์ยอดงด.เดะหมด)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-08-4",
@@ -1253,7 +1286,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (เคลียร์ยอดงด.เดะหมด)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-08-5",
@@ -1264,7 +1297,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (เดะ) (เคลียร์ยอดงด.เดะหมด)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-07",
@@ -1286,7 +1319,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-07-2",
@@ -1297,7 +1330,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-07-3",
@@ -1308,7 +1341,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-07-5",
@@ -1319,7 +1352,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (เดะ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-06",
@@ -1341,7 +1374,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ) (คืนสูน้องสำรองจาย)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-06-2",
@@ -1352,7 +1385,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง (คืนสูน้องสำรองจาย)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-06-3",
@@ -1363,7 +1396,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (คืนสูน้องสำรองจาย)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-06-4",
@@ -1374,7 +1407,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (คืนสูน้องสำรองจาย)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-05",
@@ -1396,7 +1429,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-05-2",
@@ -1407,7 +1440,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-05-3",
@@ -1418,7 +1451,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-05-4",
@@ -1429,7 +1462,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-04",
@@ -1451,7 +1484,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ) (ค้างกะแว 3414 / ค้าง 3414)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-04-2",
@@ -1462,7 +1495,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง (ค้างกะแว 3414 / ค้าง 3414)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-04-3",
@@ -1473,7 +1506,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี) (ค้างกะแว 3414 / ค้าง 3414)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-04-4",
@@ -1484,7 +1517,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (ค้างกะแว 3414 / ค้าง 3414)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-02",
@@ -1506,7 +1539,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-02-2",
@@ -1517,7 +1550,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-02-3",
@@ -1528,7 +1561,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-02-4",
@@ -1539,7 +1572,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-02-5",
@@ -1550,7 +1583,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (เดะ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-sales-2026-07-01",
@@ -1572,7 +1605,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าของ (วัตถุดิบ)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-01-2",
@@ -1583,7 +1616,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "น้ำแข็ง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-01-3",
@@ -1594,7 +1627,7 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง (วี)",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
   },
   {
     "id": "tx-exp-2026-07-01-4",
@@ -1605,11 +1638,536 @@ export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
     "description": "ค่าแรง",
     "paymentMethod": "cash",
     "source": "excel_import",
-    "createdAt": "2026-07-31T18:00:00.000Z"
+    "createdAt": "2026-08-06T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-30",
+    "date": "2026-06-30",
+    "type": "income",
+    "amount": 3222,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (14 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-29",
+    "date": "2026-06-29",
+    "type": "income",
+    "amount": 2561,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (14 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-28",
+    "date": "2026-06-28",
+    "type": "income",
+    "amount": 3221,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (12 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-27",
+    "date": "2026-06-27",
+    "type": "income",
+    "amount": 4843,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (20 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-25",
+    "date": "2026-06-25",
+    "type": "income",
+    "amount": 3769,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (13 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-24",
+    "date": "2026-06-24",
+    "type": "income",
+    "amount": 5067,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (19 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-23",
+    "date": "2026-06-23",
+    "type": "income",
+    "amount": 6679,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (13 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-22",
+    "date": "2026-06-22",
+    "type": "income",
+    "amount": 3193,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (11 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-21",
+    "date": "2026-06-21",
+    "type": "income",
+    "amount": 6662,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (20 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-20",
+    "date": "2026-06-20",
+    "type": "income",
+    "amount": 4923,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (19 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-19",
+    "date": "2026-06-19",
+    "type": "income",
+    "amount": 280,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (1 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-18",
+    "date": "2026-06-18",
+    "type": "income",
+    "amount": 2242,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (10 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-17",
+    "date": "2026-06-17",
+    "type": "income",
+    "amount": 4238,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (12 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-16",
+    "date": "2026-06-16",
+    "type": "income",
+    "amount": 2233,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (11 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-15",
+    "date": "2026-06-15",
+    "type": "income",
+    "amount": 2282,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (8 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-14",
+    "date": "2026-06-14",
+    "type": "income",
+    "amount": 3959,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (15 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-13",
+    "date": "2026-06-13",
+    "type": "income",
+    "amount": 6235,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (28 ใบเสร็จ) (หักคืนเงิน 165.00 บาท)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-12",
+    "date": "2026-06-12",
+    "type": "income",
+    "amount": 514.75,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (3 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-03",
+    "date": "2026-06-03",
+    "type": "income",
+    "amount": 6930,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (24 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-02",
+    "date": "2026-06-02",
+    "type": "income",
+    "amount": 5784,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (18 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
+  },
+  {
+    "id": "tx-sales-2026-06-01",
+    "date": "2026-06-01",
+    "type": "income",
+    "amount": 4300,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (17 ใบเสร็จ)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-06-30T18:00:00.000Z"
   }
 ];
 
 export const REAL_DAILY_SALES: DailySalesRecord[] = [
+  {
+    "date": "2026-06-01",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 4300,
+    "orderCount": 17,
+    "netSales": 4300,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-02",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 5784,
+    "orderCount": 18,
+    "netSales": 5784,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-03",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 6930,
+    "orderCount": 24,
+    "netSales": 6930,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-12",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 514.75,
+    "orderCount": 3,
+    "netSales": 514.75,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-13",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 6400,
+    "orderCount": 28,
+    "netSales": 6235,
+    "serviceFee": 0,
+    "discount": 165,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-14",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 3959,
+    "orderCount": 15,
+    "netSales": 3959,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-15",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 2282,
+    "orderCount": 8,
+    "netSales": 2282,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-16",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 2233,
+    "orderCount": 11,
+    "netSales": 2233,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-17",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 4238,
+    "orderCount": 12,
+    "netSales": 4238,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-18",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 2242,
+    "orderCount": 10,
+    "netSales": 2242,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-19",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 280,
+    "orderCount": 1,
+    "netSales": 280,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-20",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 4923,
+    "orderCount": 19,
+    "netSales": 4923,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-21",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 6662,
+    "orderCount": 20,
+    "netSales": 6662,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-22",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 3193,
+    "orderCount": 11,
+    "netSales": 3193,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-23",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 6679,
+    "orderCount": 13,
+    "netSales": 6679,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-24",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 5067,
+    "orderCount": 19,
+    "netSales": 5067,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-25",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 3769,
+    "orderCount": 13,
+    "netSales": 3769,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-27",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 4843,
+    "orderCount": 20,
+    "netSales": 4843,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-28",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 3221,
+    "orderCount": 12,
+    "netSales": 3221,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-29",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 2561,
+    "orderCount": 14,
+    "netSales": 2561,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-06-30",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 3222,
+    "orderCount": 14,
+    "netSales": 3222,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
   {
     "date": "2026-07-01",
     "channel": "ALL",
@@ -2107,6 +2665,20 @@ export const REAL_DAILY_SALES: DailySalesRecord[] = [
     "totalSales": 4850,
     "orderCount": 26,
     "netSales": 4850,
+    "serviceFee": 0,
+    "discount": 0,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
+  },
+  {
+    "date": "2026-08-06",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 4973,
+    "orderCount": 27,
+    "netSales": 4973,
     "serviceFee": 0,
     "discount": 0,
     "tax": 0,
@@ -3142,7 +3714,7 @@ export const REAL_CASH_FLOW: CashFlowRecord[] = [
     "paymentTime": "2026-08-01 12:00:00",
     "type": "CashOut",
     "recipient": "ผู้ดูแลร้าน",
-    "note": "ซื้อของ (วัตถุดิบ)",
+    "note": "ซื้อของ (วัตถุดิบ) (คืนเงิน 1,172 บาท (ยอดก่อนคืน 5,899 บาท))",
     "amount": -350,
     "category": "wholesale",
     "paymentMethod": "cash"
@@ -3152,7 +3724,7 @@ export const REAL_CASH_FLOW: CashFlowRecord[] = [
     "paymentTime": "2026-08-01 12:00:00",
     "type": "CashOut",
     "recipient": "ผู้ดูแลร้าน",
-    "note": "ค่าแรง (วี)",
+    "note": "ค่าแรง (วี) (คืนเงิน 1,172 บาท (ยอดก่อนคืน 5,899 บาท))",
     "amount": -100,
     "category": "staff_wages",
     "paymentMethod": "cash"
@@ -3222,7 +3794,7 @@ export const REAL_CASH_FLOW: CashFlowRecord[] = [
     "paymentTime": "2026-08-04 12:00:00",
     "type": "CashOut",
     "recipient": "ผู้ดูแลร้าน",
-    "note": "ซื้อของ (วัตถุดิบ) (*มัทฉะกาแฟเก็บออม7485)",
+    "note": "ซื้อของ (วัตถุดิบ) (*มัทฉะกาแฟเก็บออม7485 | คืนเงิน 65 บาท (ยอดก่อนคืน 1,487 บาท))",
     "amount": -9337,
     "category": "wholesale",
     "paymentMethod": "cash"
@@ -3232,7 +3804,7 @@ export const REAL_CASH_FLOW: CashFlowRecord[] = [
     "paymentTime": "2026-08-04 12:00:00",
     "type": "CashOut",
     "recipient": "ผู้ดูแลร้าน",
-    "note": "ค่าแรง (วี) (*มัทฉะกาแฟเก็บออม7485)",
+    "note": "ค่าแรง (วี) (*มัทฉะกาแฟเก็บออม7485 | คืนเงิน 65 บาท (ยอดก่อนคืน 1,487 บาท))",
     "amount": -100,
     "category": "staff_wages",
     "paymentMethod": "cash"
@@ -3264,6 +3836,26 @@ export const REAL_CASH_FLOW: CashFlowRecord[] = [
     "recipient": "ผู้ดูแลร้าน",
     "note": "ค่าแรง (คนงาน) (จ่ายบังนัน)",
     "amount": -4000,
+    "category": "staff_wages",
+    "paymentMethod": "cash"
+  },
+  {
+    "id": "cf-2026-08-06-2",
+    "paymentTime": "2026-08-06 12:00:00",
+    "type": "CashOut",
+    "recipient": "ผู้ดูแลร้าน",
+    "note": "ซื้อของ (วัตถุดิบ) (คืนเงิน 215 บาท (ยอดก่อนคืน 5,188 บาท))",
+    "amount": -1960,
+    "category": "wholesale",
+    "paymentMethod": "cash"
+  },
+  {
+    "id": "cf-2026-08-06-3",
+    "paymentTime": "2026-08-06 12:00:00",
+    "type": "CashOut",
+    "recipient": "ผู้ดูแลร้าน",
+    "note": "ค่าแรง (พนักงาน) (คืนเงิน 215 บาท (ยอดก่อนคืน 5,188 บาท))",
+    "amount": -5400,
     "category": "staff_wages",
     "paymentMethod": "cash"
   }

@@ -15,6 +15,8 @@ const CATEGORY_MAP: Record<string, { catId: CategoryId; name: string }> = {
   'ค่าเน็ต': { catId: 'utilities', name: 'ค่าเน็ต' },
   'ค่าอุปกรณ์': { catId: 'other_expense', name: 'ค่าอุปกรณ์' },
   'ขาย': { catId: 'pos_sales', name: 'ยอดขาย' },
+  'ยอดขายสุทธิ': { catId: 'pos_sales', name: 'ยอดขายสุทธิ' },
+  'ยอดขายก่อนคืน': { catId: 'pos_sales', name: 'ยอดขายก่อนคืน' },
 };
 
 const THAI_MONTHS: Record<string, number> = {
@@ -153,6 +155,13 @@ export async function parseCustomExpenseFile(file: File): Promise<ParsedExpenseS
             for (let col = 1; col < headers.length; col++) {
               const header = headers[col];
               if (!header || header === 'รวมรายจ่าย/วัน' || header === 'กำไร(ขาดทุน)/วัน' || header === 'หมายเหตุ') {
+                continue;
+              }
+
+              if (headers.includes('ยอดขายสุทธิ') && header === 'ยอดขายก่อนคืน') {
+                continue;
+              }
+              if (header === 'จำนวนใบเสร็จ' || header === 'จำนวนใบคืนเงิน' || header === 'คืนเงิน') {
                 continue;
               }
 
