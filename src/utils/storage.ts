@@ -16,7 +16,7 @@ export const getStoredTransactions = (): Transaction[] => {
         const expSum = parsed
           .filter((t: any) => t.type === 'expense')
           .reduce((acc: number, t: any) => acc + Math.abs(t.amount || 0), 0);
-        if (expSum === 184726) return parsed;
+        if (expSum === 186326) return parsed;
       }
     }
   } catch (err) {

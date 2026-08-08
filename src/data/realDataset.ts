@@ -2,6 +2,28 @@ import type { Transaction, DailySalesRecord, CashFlowRecord } from '../types/fin
 
 export const REAL_DATASET_TRANSACTIONS: Transaction[] = [
   {
+    "id": "tx-sales-2026-08-08",
+    "date": "2026-08-08",
+    "type": "income",
+    "amount": 8114,
+    "category": "pos_sales",
+    "description": "ยอดขาย POS (25 ออเดอร์ - Google Sheets 8 ส.ค.)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-08-08T18:00:00.000Z"
+  },
+  {
+    "id": "tx-exp-2026-08-08-1",
+    "date": "2026-08-08",
+    "type": "expense",
+    "amount": 1600,
+    "category": "coffee_beans",
+    "description": "ซื้อของ (วัตถุดิบ 8 ส.ค.)",
+    "paymentMethod": "cash",
+    "source": "excel_import",
+    "createdAt": "2026-08-08T18:00:00.000Z"
+  },
+  {
     "id": "tx-sales-2026-08-06",
     "date": "2026-08-06",
     "type": "income",
@@ -2685,6 +2707,20 @@ export const REAL_DAILY_SALES: DailySalesRecord[] = [
     "tip": 0,
     "rounding": 0,
     "deliveryFee": 0
+  },
+  {
+    "date": "2026-08-08",
+    "channel": "ALL",
+    "salesChannel": "ALL",
+    "totalSales": 8134,
+    "orderCount": 25,
+    "netSales": 8114,
+    "serviceFee": 0,
+    "discount": 20,
+    "tax": 0,
+    "tip": 0,
+    "rounding": 0,
+    "deliveryFee": 0
   }
 ];
 
@@ -3857,6 +3893,16 @@ export const REAL_CASH_FLOW: CashFlowRecord[] = [
     "note": "ค่าแรง (พนักงาน) (คืนเงิน 215 บาท (ยอดก่อนคืน 5,188 บาท))",
     "amount": -5400,
     "category": "staff_wages",
+    "paymentMethod": "cash"
+  },
+  {
+    "id": "cf-2026-08-08-1",
+    "paymentTime": "2026-08-08 12:00:00",
+    "type": "CashOut",
+    "recipient": "ผู้ดูแลร้าน",
+    "note": "ซื้อของ (วัตถุดิบ 8 ส.ค.)",
+    "amount": -1600,
+    "category": "wholesale",
     "paymentMethod": "cash"
   }
 ];

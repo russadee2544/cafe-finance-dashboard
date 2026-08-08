@@ -42,7 +42,7 @@ export const getStoredCashFlow = (): CashFlowRecord[] => {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) {
         const expSum = parsed.reduce((acc: number, r: any) => acc + Math.abs(r.amount || 0), 0);
-        if (expSum === 184726) return parsed;
+        if (expSum === 186326) return parsed;
       }
     }
   } catch (e) {
